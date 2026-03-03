@@ -425,7 +425,7 @@ tbody tr:last-child { border-bottom: none; }
       </div>
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-quote">Calculate ERP</button>
-        <button class="btn btn-ghost" id="btn-example">Load Example</button>
+        <button class="btn btn-ghost" id="btn-example">Show Example</button>
       </div>
     </div>
 
@@ -591,13 +591,27 @@ document.getElementById('btn-quote').addEventListener('click', doQuote);
 document.getElementById('q-model').addEventListener('keydown', e => { if (e.key === 'Enter') doQuote(); });
 
 document.getElementById('btn-example').addEventListener('click', () => {
-  document.getElementById('q-model').value = 'HP EliteBook 840 G8';
-  document.getElementById('q-ram').value   = '16';
-  document.getElementById('q-ssd').value   = '256';
-  document.getElementById('q-grade').value = 'A';
-  document.getElementById('q-battery').value = 'good';
-  document.getElementById('q-region').value  = 'EU';
-  doQuote();
+  document.getElementById('q-model').value    = 'HP EliteBook 840 G8';
+  document.getElementById('q-ram').value      = '16';
+  document.getElementById('q-ssd').value      = '256';
+  document.getElementById('q-grade').value    = 'A';
+  document.getElementById('q-battery').value  = 'good';
+  document.getElementById('q-region').value   = 'EU';
+  document.getElementById('q-cpu').value      = '';
+  // Show hardcoded example result directly — no API call needed
+  showQuoteResult({
+    gen: 'Gen11', status: 'GO',
+    advisedPrice: 275, priceLow: 234, priceHigh: 316,
+    ramGb: 16, ssdGb: 256, grade: 'A', region: 'EU',
+    cpu: null,
+    knownCpus: ['i5-1135G7', 'i5-1145G7', 'i7-1165G7', 'i7-1185G7'],
+    reasoning: [
+      'Model matched: "hp elitebook 840 g8" → Gen11',
+      'Base price Gen11: €245',
+      'RAM 16GB adj: €30, SSD 256GB adj: €0, Battery adj: €0',
+      'Grade A ×1, Brand mult ×1',
+    ],
+  }, 'HP EliteBook 840 G8');
 });
 
 async function doQuote() {
@@ -640,14 +654,17 @@ function showQuoteResult(r, model) {
   document.getElementById('r-ssd').textContent   = r.ssdGb >= 1024 ? (r.ssdGb / 1024) + ' TB' : r.ssdGb + ' GB';
   document.getElementById('r-grade').textContent = r.grade;
 
-  // CPU: show entered value, or list known CPUs for this gen as hints
+  // CPU: show entered value, or known CPUs for this gen joined with " / "
   const cpuEl = document.getElementById('r-cpu');
   if (r.cpu) {
     cpuEl.textContent = r.cpu;
+    cpuEl.style.fontSize = '';
   } else if (r.knownCpus && r.knownCpus.length) {
-    cpuEl.innerHTML = r.knownCpus.map(c => `<span style="display:inline-block;margin:1px 2px;font-size:11px;color:var(--muted)">${c}</span>`).join(' · ');
+    cpuEl.textContent = r.knownCpus.join(' / ');
+    cpuEl.style.fontSize = '12px';
   } else {
     cpuEl.textContent = '—';
+    cpuEl.style.fontSize = '';
   }
 
   // Populate CPU datalist with hints for next time

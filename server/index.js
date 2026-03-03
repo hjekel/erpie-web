@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, '../client/public')));
 
 // ─── COLUMN NAME ALIASES ───────────────────────────────────────────────────────
 const COL_ALIASES = {
-  model:   ['model', 'device', 'product', 'description', 'item'],
+  model:   ['model', 'device', 'devicename', 'product', 'description', 'item', 'name', 'assetname', 'computername'],
   cpu:     ['cpu', 'processor', 'proc'],
   ram:     ['ram', 'memory', 'mem'],
   ssd:     ['ssd', 'storage', 'hdd', 'disk', 'drive'],
@@ -23,6 +23,23 @@ const COL_ALIASES = {
   serial:  ['serial', 'serialnumber', 'sn', 'asset', 'assettag'],
   qty:     ['qty', 'quantity', 'count', 'units'],
 };
+
+// Keywords used to detect model columns in headerless files
+const MODEL_KEYWORDS = ['hp', 'dell', 'lenovo', 'apple', 'thinkpad', 'elitebook',
+  'latitude', 'macbook', 'probook', 'optiplex', 'toshiba', 'portege', 'xps',
+  'ideapad', 'thinkcentre', 'zbook', 'vostro', 'fujitsu', 'asus', 'acer'];
+
+const SERIAL_RE = /^[A-Z0-9]{8,}$/i;
+const RAM_VALS  = new Set(['4', '8', '16', '32', '64']);
+const SSD_VALS  = new Set(['128', '256', '512', '1024', '2048']);
+const GRADE_RE  = /^[A-D]\d?$/i;
+
+function cellStr(v) { return String(v ?? '').trim(); }
+
+function looksLikeModel(v) {
+  const s = cellStr(v).toLowerCase();
+  return MODEL_KEYWORDS.some(k => s.includes(k));
+}
 
 function resolveCol(headers, field) {
   const aliases = COL_ALIASES[field] || [field];
@@ -36,22 +53,92 @@ function resolveCol(headers, field) {
 function parseExcel(buffer) {
   const wb    = XLSX.read(buffer, { type: 'buffer' });
   const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows  = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-  if (!rows.length) return [];
 
+  // Always load raw rows to check if first row looks like headers
+  const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+  if (!rawRows.length) return [];
+
+  const firstRow = rawRows[0].map(cellStr);
+  const aliasFlat = Object.values(COL_ALIASES).flat();
+  const hasHeaders = firstRow.some(h =>
+    aliasFlat.includes(h.toLowerCase().replace(/[\s_-]/g, ''))
+  );
+
+  if (hasHeaders) {
+    return parseWithHeaders(sheet);
+  }
+  return parseHeaderless(rawRows);
+}
+
+function parseWithHeaders(sheet) {
+  const rows    = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+  if (!rows.length) return [];
   const headers = Object.keys(rows[0]);
   const colMap  = {};
   for (const field of Object.keys(COL_ALIASES)) {
     colMap[field] = resolveCol(headers, field);
   }
+  const mappedCols = new Set(Object.values(colMap).filter(Boolean));
 
-  return rows.map(row => {
-    const device = {};
-    for (const [field, col] of Object.entries(colMap)) {
-      if (col) device[field] = row[col];
-    }
-    return device;
-  }).filter(d => d.model);
+  return rows
+    .filter(row => headers.some(h => cellStr(row[h]).length > 0)) // skip empty rows
+    .map(row => {
+      const device = {};
+      for (const [field, col] of Object.entries(colMap)) {
+        if (col) device[field] = cellStr(row[col]);
+      }
+      // Auto-detect serial: first unmapped column with 8+ alphanumeric chars
+      if (!device.serial) {
+        for (const col of headers) {
+          if (mappedCols.has(col)) continue;
+          const v = cellStr(row[col]);
+          if (SERIAL_RE.test(v)) { device.serial = v; break; }
+        }
+      }
+      return device;
+    })
+    .filter(d => d.model);
+}
+
+function parseHeaderless(rawRows) {
+  const numCols = Math.max(...rawRows.map(r => r.length));
+
+  // Score each column for what it likely contains
+  let modelCol = -1, ramCol = -1, ssdCol = -1, gradeCol = -1, serialCol = -1;
+
+  for (let c = 0; c < numCols; c++) {
+    const vals = rawRows.map(r => cellStr(r[c])).filter(v => v.length > 0);
+    if (!vals.length) continue;
+    const ratio = n => n / vals.length;
+
+    const modelScore  = ratio(vals.filter(looksLikeModel).length);
+    const ramScore    = ratio(vals.filter(v => RAM_VALS.has(v) || /^\d+\s*gb$/i.test(v)).length);
+    const ssdScore    = ratio(vals.filter(v => SSD_VALS.has(v) || /^\d+\s*(gb|tb)$/i.test(v)).length);
+    const gradeScore  = ratio(vals.filter(v => GRADE_RE.test(v)).length);
+    const serialScore = ratio(vals.filter(v => SERIAL_RE.test(v)).length);
+
+    if (modelCol  === -1 && modelScore  >= 0.3) modelCol  = c;
+    if (ramCol    === -1 && ramScore    >= 0.3 && c !== modelCol) ramCol    = c;
+    if (ssdCol    === -1 && ssdScore    >= 0.3 && c !== modelCol && c !== ramCol) ssdCol = c;
+    if (gradeCol  === -1 && gradeScore  >= 0.3) gradeCol  = c;
+    if (serialCol === -1 && serialScore >= 0.3 && c !== modelCol) serialCol = c;
+  }
+
+  if (modelCol === -1) return []; // cannot determine model column
+
+  return rawRows
+    .filter(row => row.some(v => cellStr(v).length > 0))         // skip empty rows
+    .filter(row => looksLikeModel(row[modelCol]))                 // must look like a device
+    .map(row => {
+      const d = {};
+      d.model   = cellStr(row[modelCol]);
+      if (ramCol    >= 0) d.ram     = cellStr(row[ramCol]);
+      if (ssdCol    >= 0) d.ssd     = cellStr(row[ssdCol]);
+      if (gradeCol  >= 0) d.grade   = cellStr(row[gradeCol]);
+      if (serialCol >= 0) d.serial  = cellStr(row[serialCol]);
+      return d;
+    })
+    .filter(d => d.model);
 }
 
 // ─── ROUTE 1: Single quote ─────────────────────────────────────────────────────

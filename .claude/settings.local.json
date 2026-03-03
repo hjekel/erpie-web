@@ -5,7 +5,8 @@
       "Bash(node:*)",
       "Bash(taskkill:*)",
       "Bash(npm start:*)",
-      "Bash(netstat -ano)"
+      "Bash(netstat -ano)",
+      "Bash(rm:*)"
     ]
   }
 }
