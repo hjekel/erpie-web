@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERPIE PriceFinder — PlanBit</title>
+<style>
+/* ── Reset & base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Dark mode (default) */
+:root {
+  --bg:       #1a1a1a;
+  --surface:  #242424;
+  --surface2: #2e2e2e;
+  --border:   #3a3a3a;
+  --accent:   #E8841A;
+  --accent2:  #c96d0f;
+  --text:     #f0ede8;
+  --muted:    #8a8a8a;
+  --go:       #00c853;
+  --watch:    #E8841A;
+  --nogo:     #f44336;
+  --radius:   12px;
+}
+
+/* Light mode */
+:root.light {
+  --bg:       #f5f3f0;
+  --surface:  #ffffff;
+  --surface2: #f0ede8;
+  --border:   #ddd8d0;
+  --accent:   #E8841A;
+  --accent2:  #c96d0f;
+  --text:     #1a1a1a;
+  --muted:    #6b6b6b;
+  --go:       #1e8c3a;
+  --watch:    #c96d0f;
+  --nogo:     #c62828;
+  --radius:   12px;
+}
+
+html { font-size: 16px; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background .2s, color .2s;
+}
+input, select, button { font-family: inherit; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 60px;
+}
+.header-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+.logo { color: var(--accent); font-size: 22px; font-weight: 800; letter-spacing: -.5px; }
+.logo-lobster { font-size: 20px; margin-right: 4px; }
+.logo-by { color: var(--muted); font-weight: 400; font-size: 14px; }
+.logo-planbit { color: var(--accent); font-weight: 700; font-size: 14px; }
+.badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  letter-spacing: .05em;
+}
+
+/* ── Dark/Light toggle ────────────────────────────────────────────────────── */
+.theme-toggle {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background .2s, border-color .2s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { border-color: var(--accent); background: var(--surface2); }
+
+/* ── Tabs ────────────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 32px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.tab {
+  padding: 14px 24px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  user-select: none;
+}
+.tab:hover { color: var(--accent); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Main layout ─────────────────────────────────────────────────────────── */
+.main { flex: 1; padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── Form grid ───────────────────────────────────────────────────────────── */
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.form-card h2 { font-size: 16px; font-weight: 600; margin-bottom: 20px; color: var(--accent); }
+.form-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 16px;
+  align-items: end;
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.field input, .field select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .2s;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+.field input::placeholder { color: var(--muted); }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn-row { display: flex; gap: 12px; margin-top: 20px; }
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all .2s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+
+/* ── Result card ─────────────────────────────────────────────────────────── */
+#result-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  display: none;
+}
+.result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.result-model { font-size: 20px; font-weight: 700; }
+.status-badge {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+.status-GO    { background: #00c85320; color: var(--go);   border: 1px solid var(--go); }
+.status-WATCH { background: #ffab0020; color: var(--watch); border: 1px solid var(--watch); }
+.status-NO-GO { background: #f4433620; color: var(--nogo); border: 1px solid var(--nogo); }
+
+.price-big { font-size: 56px; font-weight: 800; color: var(--accent); line-height: 1; }
+.price-band { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+.detail-item { background: var(--surface2); border-radius: 8px; padding: 14px; }
+.detail-item .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.detail-item .value { font-size: 18px; font-weight: 700; margin-top: 4px; }
+
+.reasoning {
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--muted);
+  font-family: monospace;
+  white-space: pre-wrap;
+  margin-bottom: 20px;
+}
+
+.search-links h3 { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.search-links-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.search-link {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  text-decoration: none;
+  transition: all .15s;
+}
+.search-link:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Batch upload ─────────────────────────────────────────────────────────── */
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 60px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--surface);
+}
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--accent);
+  background: #E8841A08;
+}
+.dropzone-icon { font-size: 48px; }
+.dropzone h3 { margin: 12px 0 6px; font-size: 18px; }
+.dropzone p { color: var(--muted); font-size: 14px; }
+.dropzone .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+.batch-options { display: flex; align-items: center; gap: 16px; margin: 16px 0; }
+.batch-options label { font-size: 13px; color: var(--muted); }
+.batch-options select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+/* ── Spinner ─────────────────────────────────────────────────────────────── */
+#loading {
+  display: none;
+  text-align: center;
+  padding: 60px;
+}
+.spinner-emoji { font-size: 48px; animation: spin 1.5s linear infinite; display: inline-block; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+#loading p { color: var(--muted); margin-top: 16px; }
+
+/* ── Summary bar ─────────────────────────────────────────────────────────── */
+#batch-results { display: none; }
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.summary-card .s-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.summary-card .s-value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+.summary-card .s-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ── Results table ───────────────────────────────────────────────────────── */
+.table-actions { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+.table-wrapper { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: var(--surface2);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:hover { background: var(--surface2); }
+tbody td { padding: 10px 14px; white-space: nowrap; }
+tbody tr:last-child { border-bottom: none; }
+
+.pill-sm {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.pill-GO    { background: #00c85320; color: var(--go);   border: 1px solid var(--go); }
+.pill-WATCH { background: #ffab0020; color: var(--watch); border: 1px solid var(--watch); }
+.pill-NO-GO { background: #f4433620; color: var(--nogo); border: 1px solid var(--nogo); }
+
+.row-GO    { border-left: 3px solid var(--go); }
+.row-WATCH { border-left: 3px solid var(--watch); }
+.row-NO-GO { border-left: 3px solid var(--nogo); }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.footer {
+  padding: 20px 32px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo"><span class="logo-lobster">🦞</span>ERPIE PriceFinder</div>
+    <span class="logo-by">by</span>
+    <span class="logo-planbit">PlanBit</span>
+    <div class="badge">v1.0</div>
+  </div>
+  <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">🌙</button>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" data-tab="quick">Quick Quote</div>
+  <div class="tab" data-tab="batch">Batch Upload</div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- ── Quick Quote panel ─────────────────────────────────────────────────── -->
+  <div class="panel active" id="panel-quick">
+    <div class="form-card">
+      <h2>Device specificaties</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label>Model</label>
+          <input type="text" id="q-model" placeholder="bijv. HP EliteBook 840 G8">
+        </div>
+        <div class="field">
+          <label>RAM</label>
+          <select id="q-ram">
+            <option value="4">4 GB</option>
+            <option value="8" selected>8 GB</option>
+            <option value="16">16 GB</option>
+            <option value="32">32 GB</option>
+            <option value="64">64 GB</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>SSD</label>
+          <select id="q-ssd">
+            <option value="128">128 GB</option>
+            <option value="256" selected>256 GB</option>
+            <option value="512">512 GB</option>
+            <option value="1024">1 TB</option>
+            <option value="2048">2 TB</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Grade</label>
+          <select id="q-grade">
+            <option value="A1">A1 — Mint</option>
+            <option value="A2">A2 — Excellent</option>
+            <option value="A3">A3 — Very Good</option>
+            <option value="A" selected>A — Good</option>
+            <option value="B">B — Fair</option>
+            <option value="B4">B4 — Below Fair</option>
+            <option value="C">C — Poor</option>
+            <option value="C6">C6 — Very Poor</option>
+            <option value="D">D — Parts Only</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Regio</label>
+          <select id="q-region">
+            <option value="EU" selected>EU</option>
+            <option value="UK">UK (−16%)</option>
+            <option value="INTL">INTL (−15%)</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px; max-width:640px">
+        <div class="field">
+          <label>Batterij</label>
+          <select id="q-battery">
+            <option value="good" selected>Good / OK</option>
+            <option value="bad">Bad / Poor (−€35)</option>
+            <option value="missing">Missing (−€50)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>CPU <span style="color:var(--muted);font-weight:400;text-transform:none">(optioneel)</span></label>
+          <input type="text" id="q-cpu" list="cpu-hints" placeholder="bijv. i5-1145G7" autocomplete="off">
+          <datalist id="cpu-hints"></datalist>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-quote">Calculate ERP</button>
+        <button class="btn btn-ghost" id="btn-example">Load Example</button>
+      </div>
+    </div>
+
+    <!-- Result card -->
+    <div id="result-card">
+      <div class="result-header">
+        <div class="result-model" id="r-model"></div>
+        <div class="status-badge" id="r-status"></div>
+      </div>
+
+      <div class="price-big" id="r-price"></div>
+      <div class="price-band" id="r-band"></div>
+
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="label">Generatie</div>
+          <div class="value" id="r-gen"></div>
+        </div>
+        <div class="detail-item">
+          <div class="label">CPU</div>
+          <div class="value" id="r-cpu" style="font-size:13px;word-break:break-all">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">RAM</div>
+          <div class="value" id="r-ram"></div>
+        </div>
+        <div class="detail-item">
+          <div class="label">SSD</div>
+          <div class="value" id="r-ssd"></div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Grade</div>
+          <div class="value" id="r-grade"></div>
+        </div>
+      </div>
+
+      <div class="reasoning" id="r-reasoning"></div>
+
+      <div class="search-links">
+        <h3>Zoek marktprijzen</h3>
+        <div class="search-links-row" id="r-links"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Batch Upload panel ────────────────────────────────────────────────── -->
+  <div class="panel" id="panel-batch">
+    <div class="form-card">
+      <div class="batch-options">
+        <label>Regio:</label>
+        <select id="b-region">
+          <option value="EU" selected>EU</option>
+          <option value="UK">UK (−16%)</option>
+          <option value="INTL">INTL (−15%)</option>
+        </select>
+      </div>
+
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone-icon">📂</div>
+        <h3>Sleep je bestand hier naartoe</h3>
+        <p>Of klik om een bestand te selecteren</p>
+        <div class="hint">Ondersteund: .xlsx, .xls, .csv</div>
+        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display:none">
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading">
+      <div class="spinner-emoji">🦞</div>
+      <p>Analyseren... even geduld</p>
+    </div>
+
+    <!-- Results -->
+    <div id="batch-results">
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="s-label">Total Assets</div>
+          <div class="s-value" id="s-total">0</div>
+          <div class="s-sub">apparaten</div>
+        </div>
+        <div class="summary-card">
+          <div class="s-label">Advised Value</div>
+          <div class="s-value" id="s-value">€0</div>
+          <div class="s-sub">totaal ERP</div>
+        </div>
+        <div class="summary-card">
+          <div class="s-label">Gemiddeld</div>
+          <div class="s-value" id="s-avg">€0</div>
+          <div class="s-sub">per apparaat</div>
+        </div>
+        <div class="summary-card">
+          <div class="s-label">GO</div>
+          <div class="s-value" id="s-go" style="color:var(--go)">0</div>
+          <div class="s-sub">apparaten</div>
+        </div>
+        <div class="summary-card">
+          <div class="s-label">WATCH</div>
+          <div class="s-value" id="s-watch" style="color:var(--watch)">0</div>
+          <div class="s-sub">apparaten</div>
+        </div>
+      </div>
+
+      <div class="table-actions">
+        <button class="btn btn-primary btn-sm" id="btn-report">Generate Report</button>
+        <button class="btn btn-ghost btn-sm" id="btn-csv">Export CSV</button>
+        <button class="btn btn-ghost btn-sm" id="btn-reset">New Analysis</button>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Model</th>
+              <th>Gen</th>
+              <th>RAM</th>
+              <th>SSD</th>
+              <th>Grade</th>
+              <th>Status</th>
+              <th>ERP</th>
+              <th>Prijsband</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  ERPIE PriceFinder · PlanBit ITAD · Prijzen zijn indicatief op basis van Rule Book v8.4
+</div>
+
+<script>
+// ── Theme toggle ─────────────────────────────────────────────────────────────
+const themeToggle = document.getElementById('theme-toggle');
+const savedTheme  = localStorage.getItem('erpie-theme') || 'dark';
+if (savedTheme === 'light') {
+  document.documentElement.classList.add('light');
+  themeToggle.textContent = '☀️';
+}
+themeToggle.addEventListener('click', () => {
+  const isLight = document.documentElement.classList.toggle('light');
+  themeToggle.textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('erpie-theme', isLight ? 'light' : 'dark');
+});
+
+// ── Tab switching ───────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Quick Quote ─────────────────────────────────────────────────────────────
+document.getElementById('btn-quote').addEventListener('click', doQuote);
+document.getElementById('q-model').addEventListener('keydown', e => { if (e.key === 'Enter') doQuote(); });
+
+document.getElementById('btn-example').addEventListener('click', () => {
+  document.getElementById('q-model').value = 'HP EliteBook 840 G8';
+  document.getElementById('q-ram').value   = '16';
+  document.getElementById('q-ssd').value   = '256';
+  document.getElementById('q-grade').value = 'A';
+  document.getElementById('q-battery').value = 'good';
+  document.getElementById('q-region').value  = 'EU';
+  doQuote();
+});
+
+async function doQuote() {
+  const model   = document.getElementById('q-model').value.trim();
+  const ram     = document.getElementById('q-ram').value;
+  const ssd     = document.getElementById('q-ssd').value;
+  const grade   = document.getElementById('q-grade').value;
+  const battery = document.getElementById('q-battery').value;
+  const region  = document.getElementById('q-region').value;
+  const cpu     = document.getElementById('q-cpu').value.trim();
+
+  if (!model) { alert('Vul een model in.'); return; }
+
+  const res  = await fetch('/api/quote', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, ram, ssd, grade, battery, region, cpu }),
+  });
+  const data = await res.json();
+  if (!data.ok) { alert('Fout: ' + data.error); return; }
+
+  showQuoteResult(data.result, model);
+}
+
+function showQuoteResult(r, model) {
+  const card = document.getElementById('result-card');
+  card.style.display = 'block';
+
+  document.getElementById('r-model').textContent = model;
+
+  const statusEl = document.getElementById('r-status');
+  statusEl.textContent = r.status;
+  statusEl.className = 'status-badge status-' + r.status;
+
+  document.getElementById('r-price').textContent = '€' + r.advisedPrice.toLocaleString('nl-NL');
+  document.getElementById('r-band').textContent  = `Prijsband: €${r.priceLow.toLocaleString('nl-NL')} – €${r.priceHigh.toLocaleString('nl-NL')}`;
+
+  document.getElementById('r-gen').textContent   = r.gen;
+  document.getElementById('r-ram').textContent   = r.ramGb + ' GB';
+  document.getElementById('r-ssd').textContent   = r.ssdGb >= 1024 ? (r.ssdGb / 1024) + ' TB' : r.ssdGb + ' GB';
+  document.getElementById('r-grade').textContent = r.grade;
+
+  // CPU: show entered value, or list known CPUs for this gen as hints
+  const cpuEl = document.getElementById('r-cpu');
+  if (r.cpu) {
+    cpuEl.textContent = r.cpu;
+  } else if (r.knownCpus && r.knownCpus.length) {
+    cpuEl.innerHTML = r.knownCpus.map(c => `<span style="display:inline-block;margin:1px 2px;font-size:11px;color:var(--muted)">${c}</span>`).join(' · ');
+  } else {
+    cpuEl.textContent = '—';
+  }
+
+  // Populate CPU datalist with hints for next time
+  const datalist = document.getElementById('cpu-hints');
+  datalist.innerHTML = (r.knownCpus || []).map(c => `<option value="${c}">`).join('');
+
+  document.getElementById('r-reasoning').textContent = r.reasoning.join('\n');
+
+  // Search links — include RAM + SSD in query for more precise results
+  const ramLabel = r.ramGb + 'GB';
+  const ssdLabel = r.ssdGb >= 1024 ? (r.ssdGb / 1024) + 'TB' : r.ssdGb + 'GB';
+  const fullQuery = `${model} ${ramLabel} ${ssdLabel} refurbished`;
+  const q  = encodeURIComponent(fullQuery);
+  const qm = encodeURIComponent(model); // model-only for sites with limited search
+  document.getElementById('r-links').innerHTML = [
+    ['Google',      `https://www.google.com/search?q=${q}`],
+    ['IT Gigant',   `https://www.itgigant.nl/zoeken?q=${qm}`],
+    ['Back Market', `https://www.backmarket.nl/nl-nl/search?q=${qm}`],
+    ['Refurbed',    `https://www.refurbed.nl/s/?q=${qm}`],
+    ['Techbuyer',   `https://www.techbuyer.com/nl/catalogsearch/result?q=${qm}`],
+  ].map(([name, url]) =>
+    `<a class="search-link" href="${url}" target="_blank" rel="noopener">${name}</a>`
+  ).join('');
+
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Batch Upload ────────────────────────────────────────────────────────────
+let batchResults = null;
+let batchSummary = null;
+
+const dropzone  = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+
+dropzone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => { if (e.target.files[0]) uploadFile(e.target.files[0]); });
+
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) uploadFile(file);
+});
+
+async function uploadFile(file) {
+  const region = document.getElementById('b-region').value;
+
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('batch-results').style.display = 'none';
+  dropzone.style.display = 'none';
+
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('region', region);
+
+  try {
+    const res  = await fetch('/api/analyze', { method: 'POST', body: fd });
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error);
+
+    batchResults = data.results;
+    batchSummary = data.summary;
+    showBatchResults(data.results, data.summary);
+  } catch (err) {
+    alert('Fout bij verwerken: ' + err.message);
+    resetBatch();
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+function showBatchResults(results, summary) {
+  document.getElementById('s-total').textContent = summary.total;
+  document.getElementById('s-value').textContent = '€' + summary.totalValue.toLocaleString('nl-NL');
+  document.getElementById('s-avg').textContent   = '€' + summary.avgValue.toLocaleString('nl-NL');
+  document.getElementById('s-go').textContent    = summary.goCount;
+  document.getElementById('s-watch').textContent = summary.watchCount;
+
+  const tbody = document.getElementById('results-body');
+  tbody.innerHTML = results.map((r, i) => `
+    <tr class="row-${r.status}">
+      <td>${i + 1}</td>
+      <td>${esc(r.model)}</td>
+      <td>${esc(r.gen || '—')}</td>
+      <td>${r.ramGb ? r.ramGb + ' GB' : '—'}</td>
+      <td>${r.ssdGb ? (r.ssdGb >= 1024 ? r.ssdGb / 1024 + ' TB' : r.ssdGb + ' GB') : '—'}</td>
+      <td>${esc(r.grade || '—')}</td>
+      <td><span class="pill-sm pill-${r.status}">${r.status}</span></td>
+      <td>€${(r.advisedPrice || 0).toLocaleString('nl-NL')}</td>
+      <td>€${(r.priceLow || 0).toLocaleString('nl-NL')} – €${(r.priceHigh || 0).toLocaleString('nl-NL')}</td>
+    </tr>`).join('');
+
+  document.getElementById('batch-results').style.display = 'block';
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Report
+document.getElementById('btn-report').addEventListener('click', async () => {
+  if (!batchResults) return;
+  const dealName = prompt('Deal naam:', 'ERPIE Deal') || 'ERPIE Deal';
+  const res = await fetch('/api/report', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ devices: batchResults, summary: batchSummary, dealName }),
+  });
+  const html = await res.text();
+  const win  = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+});
+
+// CSV export
+document.getElementById('btn-csv').addEventListener('click', () => {
+  if (!batchResults) return;
+  const header = ['Model','Gen','RAM GB','SSD GB','Grade','Status','ERP','Price Low','Price High'];
+  const rows   = batchResults.map(r => [
+    r.model, r.gen, r.ramGb, r.ssdGb, r.grade, r.status,
+    r.advisedPrice, r.priceLow, r.priceHigh
+  ].map(v => `"${String(v || '').replace(/"/g,'""')}"`).join(','));
+  const csv  = [header.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a'); a.href = url; a.download = 'erpie-export.csv';
+  a.click(); URL.revokeObjectURL(url);
+});
+
+// Reset
+document.getElementById('btn-reset').addEventListener('click', resetBatch);
+function resetBatch() {
+  batchResults = null; batchSummary = null;
+  document.getElementById('batch-results').style.display = 'none';
+  document.getElementById('loading').style.display = 'none';
+  dropzone.style.display = 'block';
+  fileInput.value = '';
+}
+</script>
+</body>
+</html>

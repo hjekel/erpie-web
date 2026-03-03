@@ -1,0 +1,98 @@
+[
+  {
+    "model": "HP EliteBook 840 G8",
+    "ram": 16,
+    "ssd": 256,
+    "grade": "A",
+    "battery": "good",
+    "serial": "CZC1234567"
+  },
+  {
+    "model": "MacBook Air M1",
+    "ram": 8,
+    "ssd": 256,
+    "grade": "A",
+    "battery": "good",
+    "serial": "FVFXYZ1234"
+  },
+  {
+    "model": "Dell Latitude 7490",
+    "ram": 8,
+    "ssd": 256,
+    "grade": "A",
+    "battery": "good",
+    "serial": "DLL7490001"
+  },
+  {
+    "model": "Lenovo ThinkPad T480",
+    "ram": 16,
+    "ssd": 512,
+    "grade": "A2",
+    "battery": "ok",
+    "serial": "LNV4802345"
+  },
+  {
+    "model": "HP EliteBook 840 G10",
+    "ram": 32,
+    "ssd": 512,
+    "grade": "A1",
+    "battery": "good",
+    "serial": "CZC9876543"
+  },
+  {
+    "model": "Dell Latitude 5430",
+    "ram": 16,
+    "ssd": 256,
+    "grade": "A",
+    "battery": "good",
+    "serial": "DLL5430001"
+  },
+  {
+    "model": "MacBook Air M2",
+    "ram": 8,
+    "ssd": 256,
+    "grade": "A1",
+    "battery": "good",
+    "serial": "FVFM2ABCDE"
+  },
+  {
+    "model": "Dell Latitude 7280",
+    "ram": 8,
+    "ssd": 256,
+    "grade": "B",
+    "battery": "bad",
+    "serial": "DLL7280001"
+  },
+  {
+    "model": "HP ProBook 450 G7",
+    "ram": 8,
+    "ssd": 256,
+    "grade": "A",
+    "battery": "good",
+    "serial": "CZC4507890"
+  },
+  {
+    "model": "Lenovo X1 Carbon Gen 9",
+    "ram": 16,
+    "ssd": 512,
+    "grade": "A2",
+    "battery": "good",
+    "serial": "LNV0X19001"
+  },
+  {
+    "model": "Dell OptiPlex 7080",
+    "ram": 16,
+    "ssd": 512,
+    "grade": "A",
+    "battery": "good",
+    "serial": "DLL7080001"
+  },
+  {
+    "model": "HP EliteBook 830 G5",
+    "ram": 8,
+    "ssd": 256,
+    "grade": "B",
+    "battery": "ok",
+    "serial": "CZC8305001"
+  }
+]

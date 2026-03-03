@@ -1,0 +1,20 @@
+{
+  "name": "erpie-pricefinder",
+  "version": "1.0.0",
+  "description": "ERPIE PriceFinder - Expected Resale Price calculator for refurbished IT equipment",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^2.1.0",
+    "xlsx": "^0.18.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "PlanBit",
+  "license": "ISC"
+}

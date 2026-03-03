@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: erpie-pricefinder
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm install
+    startCommand: node server/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
