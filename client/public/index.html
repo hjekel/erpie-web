@@ -129,12 +129,9 @@ input, select, button { font-family: inherit; }
   margin-bottom: 24px;
 }
 .form-card h2 { font-size: 16px; font-weight: 600; margin-bottom: 20px; color: var(--accent); }
-.form-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-  gap: 16px;
-  align-items: end;
-}
+.form-row { display: grid; gap: 16px; align-items: end; }
+.form-row-1 { grid-template-columns: 2fr 1fr 1fr; }
+.form-row-2 { grid-template-columns: 1fr 1fr 1fr 1fr; margin-top: 14px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
 .field input, .field select {
@@ -360,10 +357,16 @@ tbody tr:last-child { border-bottom: none; }
   <div class="panel active" id="panel-quick">
     <div class="form-card">
       <h2>Device specificaties</h2>
-      <div class="form-grid">
+      <!-- Row 1: Model · CPU · RAM -->
+      <div class="form-row form-row-1">
         <div class="field">
           <label>Model</label>
           <input type="text" id="q-model" placeholder="bijv. HP EliteBook 840 G8">
+        </div>
+        <div class="field">
+          <label>CPU</label>
+          <input type="text" id="q-cpu" list="cpu-hints" placeholder="bijv. i5-1145G7" autocomplete="off">
+          <datalist id="cpu-hints"></datalist>
         </div>
         <div class="field">
           <label>RAM</label>
@@ -375,6 +378,9 @@ tbody tr:last-child { border-bottom: none; }
             <option value="64">64 GB</option>
           </select>
         </div>
+      </div>
+      <!-- Row 2: SSD · Grade · Regio · Batterij -->
+      <div class="form-row form-row-2">
         <div class="field">
           <label>SSD</label>
           <select id="q-ssd">
@@ -407,8 +413,6 @@ tbody tr:last-child { border-bottom: none; }
             <option value="INTL">INTL (−15%)</option>
           </select>
         </div>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px; max-width:640px">
         <div class="field">
           <label>Batterij</label>
           <select id="q-battery">
@@ -416,11 +420,6 @@ tbody tr:last-child { border-bottom: none; }
             <option value="bad">Bad / Poor (−€35)</option>
             <option value="missing">Missing (−€50)</option>
           </select>
-        </div>
-        <div class="field">
-          <label>CPU <span style="color:var(--muted);font-weight:400;text-transform:none">(optioneel)</span></label>
-          <input type="text" id="q-cpu" list="cpu-hints" placeholder="bijv. i5-1145G7" autocomplete="off">
-          <datalist id="cpu-hints"></datalist>
         </div>
       </div>
       <div class="btn-row">
