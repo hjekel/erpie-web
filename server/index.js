@@ -36,7 +36,7 @@ const MODEL_KEYWORDS = [
 
 const PRODUCT_TYPES = new Set([
   'notebook', 'desktop', 'all-in-one', 'allinone', 'mobile', 'mobile phone',
-  'tablet', 'workstation', 'server', 'monitor',
+  'mobilephone', 'tablet', 'workstation', 'server', 'monitor',
 ]);
 
 const SERIAL_RE = /^[A-Z0-9]{6,}$/i;
@@ -414,7 +414,15 @@ app.post('/api/analyze-text', (req, res) => {
 
 // ─── TEXT INPUT PARSER ────────────────────────────────────────────────────────
 function parseTextInput(text) {
-  const lines = text.split(/[\n;,]+/).map(l => l.trim()).filter(l => l.length > 5);
+  // Strip email header lines (line-by-line, safe — avoids eating device lines)
+  const EMAIL_JUNK = /^(summarize this email|inbox|re:|fwd:|from:|to me|to:|subject:|sent:|cc:|planbit|feb |mar |jan |apr |may |jun |jul |aug |sep |oct |nov |dec |http)/i;
+  const HAS_DEVICE = /\b(dell|hp|lenovo|apple|macbook|thinkpad|latitude|elitebook|surface|asus|acer|fujitsu|samsung|microsoft|iphone|ipad|galaxy)\b/i;
+
+  const lines = text
+    .split(/[\n;]+/)
+    .map(l => l.trim())
+    .filter(l => l.length > 5)
+    .filter(l => !EMAIL_JUNK.test(l) || HAS_DEVICE.test(l));
   const devices = [];
 
   for (const line of lines) {
@@ -450,10 +458,8 @@ function parseTextInput(text) {
     const modelRaw = rest.split(/[\/,]|\b(i[3579][-\s]|\d+GB|\d+TB|Gen\d|M[12]\b)/)[0].trim();
     const model = modelRaw.replace(/^(\d+\s*[xX×]\s*)/, '').trim();
 
-    const expand = qty <= 10 ? qty : 1;
-    for (let i = 0; i < expand; i++) {
-      devices.push({ model, cpu, ram, ssd, qty: expand === 1 ? qty : 1 });
-    }
+    // Always push ONE row; qty is stored for display (avoids 60x duplicate rows)
+    devices.push({ model, cpu, ram, ssd });
   }
   return devices;
 }
