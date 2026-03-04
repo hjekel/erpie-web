@@ -164,8 +164,8 @@ function parsePWC(wb, sheetName, headerRowIdx) {
     const ramMatch = memRaw.match(/(\d+)\s*GB/i);
     const ram = ramMatch ? ramMatch[1] + 'GB' : '';
 
-    // Quantity — cap at 500 to handle large vendor quotes (PWC = 6000 units)
-    const qtyRaw = qtyCol >= 0 ? row[qtyCol] : 1;
+    // Quantity — strip commas ("6,000" → 6000), cap at 500 for display
+    const qtyRaw = qtyCol >= 0 ? String(row[qtyCol] ?? '').replace(/,/g, '') : '1';
     const qty = Math.min(parseInt(qtyRaw) || 1, 500);
 
     // For large batches (qty > 10), just add one representative line
@@ -426,8 +426,8 @@ function parseTextInput(text) {
   const devices = [];
 
   for (const line of lines) {
-    // Extract qty: "60x", "60 x", "3×", leading number
-    const qtyMatch = line.match(/^(\d+)\s*[xX×]/);
+    // Extract qty: "60x", "- 60x", "60 x", "3×", leading number with optional dash/bullet
+    const qtyMatch = line.match(/^[\-\*\•\·]?\s*(\d+)\s*[xX×]/);
     const qty = qtyMatch ? Math.min(parseInt(qtyMatch[1]), 500) : 1;
     const rest = qtyMatch ? line.slice(qtyMatch[0].length).trim() : line;
 
@@ -456,7 +456,7 @@ function parseTextInput(text) {
 
     // Model: take up to first / or , or spec indicator
     const modelRaw = rest.split(/[\/,]|\b(i[3579][-\s]|\d+GB|\d+TB|Gen\d|M[12]\b)/)[0].trim();
-    const model = modelRaw.replace(/^(\d+\s*[xX×]\s*)/, '').trim();
+    const model = modelRaw.replace(/^[-\*\•\·\s]+/, '').trim();
 
     // Always push ONE row; qty is stored for display (avoids 60x duplicate rows)
     devices.push({ model, cpu, ram, ssd });
