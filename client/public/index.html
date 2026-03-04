@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ERPIE PriceFinder — PlanBit</title>
+<title>ERPIE PriceFinder – Incredible Projects</title>
 <style>
-/* ── Reset & base ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Reset & base â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* Dark mode (default) */
@@ -14,12 +14,12 @@
   --surface:  #242424;
   --surface2: #2e2e2e;
   --border:   #3a3a3a;
-  --accent:   #E8841A;
-  --accent2:  #c96d0f;
+  --accent:   #CC0000;
+  --accent2:  #aa0000;
   --text:     #f0ede8;
   --muted:    #8a8a8a;
   --go:       #00c853;
-  --watch:    #E8841A;
+  --watch:    #CC0000;
   --nogo:     #f44336;
   --radius:   12px;
 }
@@ -30,12 +30,12 @@
   --surface:  #ffffff;
   --surface2: #f0ede8;
   --border:   #ddd8d0;
-  --accent:   #E8841A;
-  --accent2:  #c96d0f;
+  --accent:   #003366;
+  --accent2:  #002244;
   --text:     #1a1a1a;
   --muted:    #6b6b6b;
   --go:       #1e8c3a;
-  --watch:    #c96d0f;
+  --watch:    #003366;
   --nogo:     #c62828;
   --radius:   12px;
 }
@@ -52,7 +52,7 @@ body {
 }
 input, select, button { font-family: inherit; }
 
-/* ── Header ──────────────────────────────────────────────────────────────── */
+/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -77,7 +77,7 @@ input, select, button { font-family: inherit; }
   letter-spacing: .05em;
 }
 
-/* ── Dark/Light toggle ────────────────────────────────────────────────────── */
+/* â”€â”€ Dark/Light toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .theme-toggle {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -94,7 +94,7 @@ input, select, button { font-family: inherit; }
 }
 .theme-toggle:hover { border-color: var(--accent); background: var(--surface2); }
 
-/* ── Tabs ────────────────────────────────────────────────────────────────── */
+/* â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .tabs {
   display: flex;
   gap: 0;
@@ -115,12 +115,12 @@ input, select, button { font-family: inherit; }
 .tab:hover { color: var(--accent); }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-/* ── Main layout ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Main layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .main { flex: 1; padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
 .panel { display: none; }
 .panel.active { display: block; }
 
-/* ── Form grid ───────────────────────────────────────────────────────────── */
+/* â”€â”€ Form grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .form-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -147,7 +147,7 @@ input, select, button { font-family: inherit; }
 .field input:focus, .field select:focus { border-color: var(--accent); }
 .field input::placeholder { color: var(--muted); }
 
-/* ── Buttons ─────────────────────────────────────────────────────────────── */
+/* â”€â”€ Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .btn-row { display: flex; gap: 12px; margin-top: 20px; }
 .btn {
   padding: 10px 20px;
@@ -168,7 +168,7 @@ input, select, button { font-family: inherit; }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 .btn-sm { padding: 7px 14px; font-size: 13px; }
 
-/* ── Result card ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Result card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 #result-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -229,7 +229,7 @@ input, select, button { font-family: inherit; }
 }
 .search-link:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ── Batch upload ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Batch upload â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .dropzone {
   border: 2px dashed var(--border);
   border-radius: var(--radius);
@@ -241,7 +241,7 @@ input, select, button { font-family: inherit; }
 }
 .dropzone:hover, .dropzone.drag-over {
   border-color: var(--accent);
-  background: #E8841A08;
+  background: var(--accent)08;
 }
 .dropzone-icon { font-size: 48px; }
 .dropzone h3 { margin: 12px 0 6px; font-size: 18px; }
@@ -260,7 +260,7 @@ input, select, button { font-family: inherit; }
   outline: none;
 }
 
-/* ── Spinner ─────────────────────────────────────────────────────────────── */
+/* â”€â”€ Spinner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 #loading {
   display: none;
   text-align: center;
@@ -270,7 +270,7 @@ input, select, button { font-family: inherit; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 #loading p { color: var(--muted); margin-top: 16px; }
 
-/* ── Summary bar ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Summary bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 #batch-results { display: none; }
 .summary-cards {
   display: grid;
@@ -288,7 +288,7 @@ input, select, button { font-family: inherit; }
 .summary-card .s-value { font-size: 24px; font-weight: 700; margin-top: 4px; }
 .summary-card .s-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-/* ── Results table ───────────────────────────────────────────────────────── */
+/* â”€â”€ Results table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .table-actions { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
 .table-wrapper { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -321,7 +321,7 @@ tbody tr:last-child { border-bottom: none; }
 .row-WATCH { border-left: 3px solid var(--watch); }
 .row-NO-GO { border-left: 3px solid var(--nogo); }
 
-/* ── Footer ──────────────────────────────────────────────────────────────── */
+/* â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .footer {
   padding: 20px 32px;
   border-top: 1px solid var(--border);
@@ -338,7 +338,7 @@ tbody tr:last-child { border-bottom: none; }
   <div class="header-left">
     <div class="logo"><span class="logo-lobster">🦞</span>ERPIE PriceFinder</div>
     <span class="logo-by">by</span>
-    <span class="logo-planbit">PlanBit</span>
+    <span class="logo-planbit">Incredible Projects</span>
     <div class="badge">v1.0</div>
   </div>
   <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">🌙</button>
@@ -353,7 +353,7 @@ tbody tr:last-child { border-bottom: none; }
 <!-- Main -->
 <div class="main">
 
-  <!-- ── Quick Quote panel ─────────────────────────────────────────────────── -->
+  <!-- â”€â”€ Quick Quote panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <div class="panel active" id="panel-quick">
     <div class="form-card">
       <h2>Device specificaties</h2>
@@ -394,31 +394,31 @@ tbody tr:last-child { border-bottom: none; }
         <div class="field">
           <label>Grade</label>
           <select id="q-grade">
-            <option value="A1">A1 — Mint</option>
-            <option value="A2">A2 — Excellent</option>
-            <option value="A3">A3 — Very Good</option>
-            <option value="A" selected>A — Good</option>
-            <option value="B">B — Fair</option>
-            <option value="B4">B4 — Below Fair</option>
-            <option value="C">C — Poor</option>
-            <option value="C6">C6 — Very Poor</option>
-            <option value="D">D — Parts Only</option>
+            <option value="A1">A1 â€” Mint</option>
+            <option value="A2">A2 â€” Excellent</option>
+            <option value="A3">A3 â€” Very Good</option>
+            <option value="A" selected>A â€” Good</option>
+            <option value="B">B â€” Fair</option>
+            <option value="B4">B4 â€” Below Fair</option>
+            <option value="C">C â€” Poor</option>
+            <option value="C6">C6 â€” Very Poor</option>
+            <option value="D">D â€” Parts Only</option>
           </select>
         </div>
         <div class="field">
           <label>Regio</label>
           <select id="q-region">
             <option value="EU" selected>EU</option>
-            <option value="UK">UK (−16%)</option>
-            <option value="INTL">INTL (−15%)</option>
+            <option value="UK">UK (âˆ’16%)</option>
+            <option value="INTL">INTL (âˆ’15%)</option>
           </select>
         </div>
         <div class="field">
           <label>Batterij</label>
           <select id="q-battery">
             <option value="good" selected>Good / OK</option>
-            <option value="bad">Bad / Poor (−€35)</option>
-            <option value="missing">Missing (−€50)</option>
+            <option value="bad">Bad / Poor (âˆ’€35)</option>
+            <option value="missing">Missing (âˆ’€50)</option>
           </select>
         </div>
       </div>
@@ -445,7 +445,7 @@ tbody tr:last-child { border-bottom: none; }
         </div>
         <div class="detail-item">
           <div class="label">CPU</div>
-          <div class="value" id="r-cpu" style="font-size:13px;word-break:break-all">—</div>
+          <div class="value" id="r-cpu" style="font-size:13px;word-break:break-all">â€”</div>
         </div>
         <div class="detail-item">
           <div class="label">RAM</div>
@@ -470,20 +470,20 @@ tbody tr:last-child { border-bottom: none; }
     </div>
   </div>
 
-  <!-- ── Batch Upload panel ────────────────────────────────────────────────── -->
+  <!-- â”€â”€ Batch Upload panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <div class="panel" id="panel-batch">
     <div class="form-card">
       <div class="batch-options">
         <label>Regio:</label>
         <select id="b-region">
           <option value="EU" selected>EU</option>
-          <option value="UK">UK (−16%)</option>
-          <option value="INTL">INTL (−15%)</option>
+          <option value="UK">UK (âˆ’16%)</option>
+          <option value="INTL">INTL (âˆ’15%)</option>
         </select>
       </div>
 
       <div class="dropzone" id="dropzone">
-        <div class="dropzone-icon">📂</div>
+        <div class="dropzone-icon">ðŸ“‚</div>
         <h3>Sleep je bestand hier naartoe</h3>
         <p>Of klik om een bestand te selecteren</p>
         <div class="hint">Ondersteund: .xlsx, .xls, .csv</div>
@@ -558,24 +558,24 @@ tbody tr:last-child { border-bottom: none; }
 
 <!-- Footer -->
 <div class="footer">
-  ERPIE PriceFinder · PlanBit ITAD · Prijzen zijn indicatief op basis van Rule Book v8.4
+  ERPIE PriceFinder · Incredible Projects · Prijzen zijn indicatief op basis van Rule Book v8.4
 </div>
 
 <script>
-// ── Theme toggle ─────────────────────────────────────────────────────────────
+// â”€â”€ Theme toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const themeToggle = document.getElementById('theme-toggle');
 const savedTheme  = localStorage.getItem('erpie-theme') || 'dark';
 if (savedTheme === 'light') {
   document.documentElement.classList.add('light');
-  themeToggle.textContent = '☀️';
+  themeToggle.textContent = '☀️';
 }
 themeToggle.addEventListener('click', () => {
   const isLight = document.documentElement.classList.toggle('light');
-  themeToggle.textContent = isLight ? '☀️' : '🌙';
+  themeToggle.textContent = isLight ? '☀️' : '🌙';
   localStorage.setItem('erpie-theme', isLight ? 'light' : 'dark');
 });
 
-// ── Tab switching ───────────────────────────────────────────────────────────
+// â”€â”€ Tab switching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -585,7 +585,7 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// ── Quick Quote ─────────────────────────────────────────────────────────────
+// â”€â”€ Quick Quote â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.getElementById('btn-quote').addEventListener('click', doQuote);
 document.getElementById('q-model').addEventListener('keydown', e => { if (e.key === 'Enter') doQuote(); });
 
@@ -597,7 +597,7 @@ document.getElementById('btn-example').addEventListener('click', () => {
   document.getElementById('q-battery').value  = 'good';
   document.getElementById('q-region').value   = 'EU';
   document.getElementById('q-cpu').value      = '';
-  // Show hardcoded example result directly — no API call needed
+  // Show hardcoded example result directly â€” no API call needed
   showQuoteResult({
     gen: 'Gen11', status: 'GO',
     advisedPrice: 275, priceLow: 234, priceHigh: 316,
@@ -605,10 +605,10 @@ document.getElementById('btn-example').addEventListener('click', () => {
     cpu: null,
     knownCpus: ['i5-1135G7', 'i5-1145G7', 'i7-1165G7', 'i7-1185G7'],
     reasoning: [
-      'Model matched: "hp elitebook 840 g8" → Gen11',
+      'Model matched: "hp elitebook 840 g8" â†’ Gen11',
       'Base price Gen11: €245',
       'RAM 16GB adj: €30, SSD 256GB adj: €0, Battery adj: €0',
-      'Grade A ×1, Brand mult ×1',
+      'Grade A Ã—1, Brand mult Ã—1',
     ],
   }, 'HP EliteBook 840 G8');
 });
@@ -646,7 +646,7 @@ function showQuoteResult(r, model) {
   statusEl.className = 'status-badge status-' + r.status;
 
   document.getElementById('r-price').textContent = '€' + r.advisedPrice.toLocaleString('nl-NL');
-  document.getElementById('r-band').textContent  = `Prijsband: €${r.priceLow.toLocaleString('nl-NL')} – €${r.priceHigh.toLocaleString('nl-NL')}`;
+  document.getElementById('r-band').textContent  = `Prijsband: €${r.priceLow.toLocaleString('nl-NL')} â€“ €${r.priceHigh.toLocaleString('nl-NL')}`;
 
   document.getElementById('r-gen').textContent   = r.gen;
   document.getElementById('r-ram').textContent   = r.ramGb + ' GB';
@@ -662,7 +662,7 @@ function showQuoteResult(r, model) {
     cpuEl.textContent = r.knownCpus.join(' / ');
     cpuEl.style.fontSize = '12px';
   } else {
-    cpuEl.textContent = '—';
+    cpuEl.textContent = 'â€”';
     cpuEl.style.fontSize = '';
   }
 
@@ -672,7 +672,7 @@ function showQuoteResult(r, model) {
 
   document.getElementById('r-reasoning').textContent = r.reasoning.join('\n');
 
-  // Search links — include RAM + SSD in query for more precise results
+  // Search links â€” include RAM + SSD in query for more precise results
   const ramLabel = r.ramGb + 'GB';
   const ssdLabel = r.ssdGb >= 1024 ? (r.ssdGb / 1024) + 'TB' : r.ssdGb + 'GB';
   const fullQuery = `${model} ${ramLabel} ${ssdLabel} refurbished`;
@@ -691,7 +691,7 @@ function showQuoteResult(r, model) {
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── Batch Upload ────────────────────────────────────────────────────────────
+// â”€â”€ Batch Upload â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let batchResults = null;
 let batchSummary = null;
 
@@ -750,13 +750,13 @@ function showBatchResults(results, summary) {
     <tr class="row-${r.status}">
       <td>${i + 1}</td>
       <td>${esc(r.model)}</td>
-      <td>${esc(r.gen || '—')}</td>
-      <td>${r.ramGb ? r.ramGb + ' GB' : '—'}</td>
-      <td>${r.ssdGb ? (r.ssdGb >= 1024 ? r.ssdGb / 1024 + ' TB' : r.ssdGb + ' GB') : '—'}</td>
-      <td>${esc(r.grade || '—')}</td>
+      <td>${esc(r.gen || 'â€”')}</td>
+      <td>${r.ramGb ? r.ramGb + ' GB' : 'â€”'}</td>
+      <td>${r.ssdGb ? (r.ssdGb >= 1024 ? r.ssdGb / 1024 + ' TB' : r.ssdGb + ' GB') : 'â€”'}</td>
+      <td>${esc(r.grade || 'â€”')}</td>
       <td><span class="pill-sm pill-${r.status}">${r.status}</span></td>
       <td>€${(r.advisedPrice || 0).toLocaleString('nl-NL')}</td>
-      <td>€${(r.priceLow || 0).toLocaleString('nl-NL')} – €${(r.priceHigh || 0).toLocaleString('nl-NL')}</td>
+      <td>€${(r.priceLow || 0).toLocaleString('nl-NL')} â€“ €${(r.priceHigh || 0).toLocaleString('nl-NL')}</td>
     </tr>`).join('');
 
   document.getElementById('batch-results').style.display = 'block';
