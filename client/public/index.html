@@ -343,6 +343,82 @@ tbody tr:last-child { border-bottom: none; }
   text-align: center;
 }
 
+/* ── Live Price Check ────────────────────────────────────────────── */
+.search-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.search-btn:hover { border-color: var(--accent); }
+.search-btn.b2b { border-color: #22c55e40; background: #22c55e10; }
+.search-btn.b2b:hover { border-color: #22c55e; background: #22c55e20; }
+.search-btn.b2c { border-color: #3b82f640; background: #3b82f610; }
+.search-btn.b2c:hover { border-color: #3b82f6; background: #3b82f620; }
+.button-row-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  margin-top: 12px;
+}
+.button-row-label:first-child { margin-top: 0; }
+
+/* ── Serial Number Check ─────────────────────────────────────────── */
+.serial-input-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.serial-input-row input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color .2s;
+}
+.serial-input-row input:focus { border-color: var(--accent); }
+.serial-input-row input::placeholder { text-transform: none; font-family: 'Segoe UI', system-ui, sans-serif; color: var(--muted); }
+.serial-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.serial-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.serial-btn:hover { border-color: var(--accent); }
+.serial-btn.primary { border-color: var(--accent); background: var(--accent); color: white; }
+.serial-btn.primary:hover { filter: brightness(1.1); }
+
 /* ── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .header { padding: 0 16px; }
@@ -352,6 +428,11 @@ tbody tr:last-child { border-bottom: none; }
   .summary-cards { grid-template-columns: repeat(2, 1fr); }
   .button-row { flex-direction: column; }
   .button-row .btn { width: 100%; text-align: center; }
+  .search-buttons { flex-direction: column; }
+  .search-btn { width: 100%; justify-content: center; }
+  .serial-input-row { flex-direction: column; }
+  .serial-buttons { flex-direction: column; }
+  .serial-btn { width: 100%; justify-content: center; }
 }
 </style>
 </head>
@@ -363,7 +444,7 @@ tbody tr:last-child { border-bottom: none; }
     <div class="logo"><span class="logo-erp">ERP</span>IE PriceFinder</div>
     <span class="logo-by">by</span>
     <span class="logo-planbit">Incredible Projects</span>
-    <div class="badge">v1.1</div>
+    <div class="badge">v1.2</div>
   </div>
   <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">&#127769;</button>
 </div>
@@ -514,6 +595,39 @@ tbody tr:last-child { border-bottom: none; }
           <label>Quantity</label>
           <input type="number" id="quantity" value="1" min="1" max="9999">
         </div>
+      </div>
+    </div>
+
+    <!-- Live Price Check Section -->
+    <div class="form-section">
+      <div class="form-section-title">Live Price Check</div>
+      <div class="button-row-label">General & B2B Marketplaces</div>
+      <div class="search-buttons">
+        <button type="button" class="search-btn" onclick="openGoogleSearch()">&#128270; Google</button>
+        <button type="button" class="search-btn b2b" onclick="openITGigant()">&#127970; IT Gigant</button>
+        <button type="button" class="search-btn b2b" onclick="openBrokerSite()">&#127978; Broker Site</button>
+      </div>
+      <div class="button-row-label">B2C Reference Prices</div>
+      <div class="search-buttons">
+        <button type="button" class="search-btn b2c" onclick="openBackMarket()">&#128230; Back Market</button>
+        <button type="button" class="search-btn b2c" onclick="openRefurbed()">&#9851;&#65039; Refurbed</button>
+        <button type="button" class="search-btn b2c" onclick="openAmazonRenewed()">&#128722; Amazon Renewed</button>
+      </div>
+    </div>
+
+    <!-- Serial Number Check Section -->
+    <div class="form-section">
+      <div class="form-section-title">Serial Number Check</div>
+      <div class="serial-input-row">
+        <input type="text" id="serialNumber" placeholder="Enter serial number (optional)...">
+      </div>
+      <div class="serial-buttons" id="serial-buttons">
+        <button type="button" class="serial-btn" id="serial-dell" onclick="openDellSupport()">Dell Support</button>
+        <button type="button" class="serial-btn" id="serial-hp" onclick="openHPSupport()">HP Support</button>
+        <button type="button" class="serial-btn" id="serial-lenovo" onclick="openLenovoSupport()">Lenovo Support</button>
+        <button type="button" class="serial-btn" id="serial-apple" onclick="openAppleCheck()">Apple Check</button>
+        <button type="button" class="serial-btn" id="serial-microsoft" onclick="openMicrosoftSupport()">Microsoft</button>
+        <button type="button" class="serial-btn" id="serial-asus" onclick="openAsusSupport()">Asus</button>
       </div>
     </div>
 
@@ -884,6 +998,9 @@ document.getElementById('brand').addEventListener('change', function() {
   // Auto-set device type for known desktop models
   const modelVal = modelSelect.value;
   autoSetDeviceType(brand, modelVal);
+
+  // Highlight matching serial check button
+  updateSerialButtons(brand);
 });
 
 // Model change → auto device type
@@ -948,6 +1065,97 @@ document.getElementById('keyboard').addEventListener('change', function() {
 });
 
 // ══════════════════════════════════════════════════════════════════════
+// LIVE PRICE CHECK
+// ══════════════════════════════════════════════════════════════════════
+
+function buildSearchQuery() {
+  const brand = document.getElementById('brand').selectedOptions[0]?.text || '';
+  const model = document.getElementById('model').selectedOptions[0]?.text || '';
+  const cpuFamily = document.getElementById('cpuFamily').selectedOptions[0]?.text || '';
+  const cpuGen = document.getElementById('cpuGen').selectedOptions[0]?.text || '';
+  const ram = document.getElementById('ram').value;
+
+  let query = `${brand} ${model}`.trim();
+
+  if (cpuFamily && !cpuFamily.includes('Select')) {
+    query += ` ${cpuFamily.replace('Intel Core ', '').replace('Apple ', '')}`;
+  }
+  if (cpuGen && !cpuGen.includes('Select')) {
+    const genMatch = cpuGen.match(/Gen (\d+)/);
+    if (genMatch) query += ` Gen${genMatch[1]}`;
+  }
+
+  if (ram) query += ` ${ram}GB`;
+
+  return encodeURIComponent(query.trim());
+}
+
+function openGoogleSearch() {
+  const query = buildSearchQuery();
+  window.open(`https://www.google.com/search?q=${query}+refurbished+price`, '_blank');
+}
+function openITGigant() {
+  window.open(`https://www.itgigant.nl/catalogsearch/result/?q=${buildSearchQuery()}`, '_blank');
+}
+function openBrokerSite() {
+  window.open(`https://www.thebrokersite.com/search?q=${buildSearchQuery()}`, '_blank');
+}
+function openBackMarket() {
+  window.open(`https://www.backmarket.nl/nl-nl/search?q=${buildSearchQuery()}`, '_blank');
+}
+function openRefurbed() {
+  window.open(`https://www.refurbed.nl/zoeken?q=${buildSearchQuery()}`, '_blank');
+}
+function openAmazonRenewed() {
+  window.open(`https://www.amazon.de/s?k=${buildSearchQuery()}+renewed`, '_blank');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// SERIAL NUMBER CHECK
+// ══════════════════════════════════════════════════════════════════════
+
+function openDellSupport() {
+  const serial = document.getElementById('serialNumber').value.trim().toUpperCase();
+  if (serial) {
+    window.open(`https://www.dell.com/support/home/nl-nl/product-support/servicetag/${serial}`, '_blank');
+  } else {
+    window.open('https://www.dell.com/support/home/nl-nl', '_blank');
+  }
+}
+function openHPSupport() {
+  window.open('https://support.hp.com/nl-nl/check-warranty', '_blank');
+}
+function openLenovoSupport() {
+  const serial = document.getElementById('serialNumber').value.trim().toUpperCase();
+  if (serial) {
+    window.open(`https://pcsupport.lenovo.com/nl/nl/products/${serial}`, '_blank');
+  } else {
+    window.open('https://pcsupport.lenovo.com/nl/nl', '_blank');
+  }
+}
+function openAppleCheck() {
+  window.open('https://checkcoverage.apple.com/', '_blank');
+}
+function openMicrosoftSupport() {
+  window.open('https://support.microsoft.com/nl-nl/surface/je-surface-serienummer-zoeken-4bc0362e-6aab-fb2e-db3c-4c0f7f74b9ff', '_blank');
+}
+function openAsusSupport() {
+  window.open('https://www.asus.com/support/warranty-status-inquiry/', '_blank');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// SMART BRAND DETECTION — highlight matching serial button
+// ══════════════════════════════════════════════════════════════════════
+
+function updateSerialButtons(brand) {
+  const allBtns = document.querySelectorAll('#serial-buttons .serial-btn');
+  allBtns.forEach(btn => btn.classList.remove('primary'));
+
+  const brandBtn = document.getElementById(`serial-${brand}`);
+  if (brandBtn) brandBtn.classList.add('primary');
+}
+
+// ══════════════════════════════════════════════════════════════════════
 // CLEAR FORM
 // ══════════════════════════════════════════════════════════════════════
 function clearForm() {
@@ -965,6 +1173,8 @@ function clearForm() {
   document.getElementById('battery').value = 'good';
   document.getElementById('quantity').value = '1';
   document.getElementById('keyboard-warning').style.display = 'none';
+  document.getElementById('serialNumber').value = '';
+  document.querySelectorAll('#serial-buttons .serial-btn').forEach(btn => btn.classList.remove('primary'));
   document.getElementById('ai-result-card').style.display = 'none';
 }
 
