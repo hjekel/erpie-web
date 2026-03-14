@@ -488,6 +488,246 @@ tbody tr:last-child { border-bottom: none; }
   .lang-switch { margin-right: 0; }
   .help-content { padding: 20px; }
 }
+
+/* ── Batch Upload v2.0 ─────────────────────────────────────── */
+.batch-textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 2px dashed var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.batch-textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+.batch-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.batch-dropzone:hover, .batch-dropzone.drag-over {
+  border-color: var(--accent);
+  background: rgba(124,58,237,0.05);
+}
+.batch-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Processing Stream Cards */
+.processing-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+.stream-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  border-left: 4px solid var(--border);
+  animation: cardSlideIn 0.3s ease;
+}
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stream-card.status-complete { border-left-color: #22c55e; }
+.stream-card.status-processing { border-left-color: #f59e0b; }
+.stream-card.status-warning { border-left-color: #ef4444; }
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.card-qty {
+  background: var(--surface2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 13px;
+}
+.card-model {
+  font-weight: 600;
+  font-size: 15px;
+  flex: 1;
+}
+.card-status { font-size: 18px; }
+.card-specs {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.card-pricing {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.card-price-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.card-price-label {
+  color: var(--muted);
+  min-width: 100px;
+}
+.card-price-value { font-weight: 600; }
+.card-price-range {
+  color: var(--muted);
+  font-size: 12px;
+}
+.card-price-row.total {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.card-price-row.total .card-price-value {
+  color: var(--accent);
+  font-size: 16px;
+}
+.card-confidence {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.confidence-bar-wrap {
+  flex: 1;
+  max-width: 100px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.confidence-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+.confidence-text {
+  font-size: 12px;
+  color: var(--muted);
+}
+.card-warning-msg {
+  background: rgba(239, 68, 68, 0.1);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #ef4444;
+  margin-top: 8px;
+}
+.card-live-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.card-live-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.card-live-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Results Summary Bar */
+.results-summary-bar {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+}
+.summary-stat {
+  font-size: 14px;
+  color: var(--muted);
+}
+.summary-stat strong {
+  color: var(--text);
+}
+
+/* Batch Results Table */
+.batch-table-wrap {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+.batch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.batch-table th {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 2px solid var(--border);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.batch-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.batch-table .totals-row td {
+  border-top: 2px solid var(--accent);
+  font-weight: 700;
+  padding-top: 14px;
+}
+.match-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.match-exact { background: #22c55e20; color: #22c55e; }
+.match-model { background: #3b82f620; color: #3b82f6; }
+.match-family { background: #f59e0b20; color: #f59e0b; }
+.match-tier { background: #ef444420; color: #ef4444; }
+.match-none { background: var(--surface2); color: var(--muted); }
+.conf-high { color: #22c55e; }
+.conf-medium { color: #f59e0b; }
+.conf-low { color: #ef4444; }
+
+@media (max-width: 640px) {
+  .batch-actions { flex-direction: column; }
+  .batch-actions .btn { width: 100%; }
+  .results-summary-bar { flex-direction: column; gap: 8px; }
+  .card-price-label { min-width: 80px; }
+}
 </style>
 </head>
 <body>
@@ -498,7 +738,7 @@ tbody tr:last-child { border-bottom: none; }
     <div class="logo"><span class="logo-lobster">🦞</span><span class="logo-erp">ERP</span>IE PriceFinder</div>
     <span class="logo-by" data-i18n="madeBy">by</span>
     <span class="logo-planbit">Incredible Projects</span>
-    <div class="badge">v1.3</div>
+    <div class="badge">v2.0</div>
   </div>
   <div class="header-right">
     <div class="lang-switch">
@@ -717,109 +957,101 @@ tbody tr:last-child { border-bottom: none; }
 
   </div>
 
-  <!-- ── Batch Upload panel ─────────────────────────────────────── -->
-  <div class="panel" id="panel-batch">
-    <div class="form-card">
-      <div class="batch-options">
-        <label>Regio:</label>
-        <select id="b-region">
-          <option value="EU" selected>EU</option>
-          <option value="UK">UK (&minus;16%)</option>
-          <option value="INTL">INTL (&minus;15%)</option>
-        </select>
+<!-- ── Batch Upload panel ─────────────────────────────────────── -->
+<div class="panel" id="panel-batch">
+  <div class="form-card">
+
+    <!-- Batch Input Section -->
+    <div class="form-section">
+      <div class="form-section-title">📋 BATCH INPUT</div>
+      <textarea id="batch-input" class="batch-textarea" placeholder="Plak hier je asset lijst...
+
+Voorbeelden van ondersteunde formaten:
+• 50x Dell Latitude 5530 i5 16/256 Grade B
+• HP EliteBook 840 G9, i5-1245U, 16GB, 512GB SSD, A-grade
+• 25 stuks Lenovo T14 Gen 2, mix i5/i7, 16GB
+
+Of sleep een bestand hierheen (Excel, CSV, TXT)" rows="8"></textarea>
+
+      <!-- File drop zone -->
+      <div class="batch-dropzone" id="batch-dropzone">
+        <span style="font-size:32px">📁</span>
+        <span>Sleep bestand hierheen of klik om te uploaden</span>
+        <span style="font-size:11px;color:var(--muted)">Ondersteund: .xlsx, .csv, .txt</span>
+        <input type="file" id="batch-file-input" accept=".xlsx,.xls,.csv,.txt" hidden>
       </div>
 
-      <!-- Input mode toggle -->
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <button id="mode-file" onclick="setInputMode('file')" style="flex:1;padding:8px 0;border-radius:8px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-weight:700;cursor:pointer;font-size:13px;">&#128194; Upload bestand</button>
-        <button id="mode-text" onclick="setInputMode('text')" style="flex:1;padding:8px 0;border-radius:8px;border:2px solid var(--border);background:transparent;color:var(--muted);font-weight:700;cursor:pointer;font-size:13px;">&#9997; Tekst plakken</button>
-      </div>
-
-      <!-- Text paste input -->
-      <div id="text-input-area" style="display:none;">
-        <textarea id="batch-text" placeholder="Plak hier een bid request of device lijst&#10;&#10;Voorbeelden:&#10;60x Dell Latitude 7430 / i7-12th / 32GB / 512GB&#10;LENOVO X1 Carbon G10, i7-1265U, 16GB, 512GB SSD&#10;3x Apple MacBook Pro 14 2021 M1 16GB 512GB"
-          style="width:100%;height:160px;padding:16px;border-radius:12px;border:2px dashed var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:14px;resize:vertical;line-height:1.6;"></textarea>
-        <button onclick="analyzeText()" style="margin-top:10px;width:100%;padding:12px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:15px;cursor:pointer;">Analyseer tekst</button>
-      </div>
-
-      <div class="dropzone" id="dropzone">
-        <div class="dropzone-icon" style="font-size:48px">&#128194;</div>
-        <h3>Sleep je bestand hier naartoe</h3>
-        <p>Of klik om een bestand te selecteren</p>
-        <div class="hint">Ondersteund: .xlsx, .xls, .csv</div>
-        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display:none">
+      <!-- Batch action buttons -->
+      <div class="batch-actions">
+        <button type="button" class="btn btn-ghost" onclick="clearBatchInput()">🗑️ Wissen</button>
+        <button type="button" class="btn btn-ghost" onclick="loadBatchExample()">📝 Voorbeeld</button>
+        <button type="button" class="btn btn-ai" onclick="processBatch()">🔍 <span>Parse & Analyseer</span></button>
       </div>
     </div>
 
-    <!-- Loading -->
-    <div id="loading">
-      <div class="spinner-emoji">&#129438;</div>
-      <p>Analyseren... even geduld</p>
-    </div>
+    <!-- Processing Stream (cards appear here) -->
+    <div class="processing-stream" id="processing-stream" style="display:none;"></div>
 
-    <!-- Results -->
-    <div id="batch-results">
-      <div class="summary-cards">
-        <div class="summary-card">
-          <div class="s-label">Total Assets</div>
-          <div class="s-value" id="s-total">0</div>
-          <div class="s-sub">apparaten</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">Advised Value</div>
-          <div class="s-value" id="s-value">&euro;0</div>
-          <div class="s-sub">totaal ERP</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">Gemiddeld</div>
-          <div class="s-value" id="s-avg">&euro;0</div>
-          <div class="s-sub">per apparaat</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">GO</div>
-          <div class="s-value" id="s-go" style="color:var(--go)">0</div>
-          <div class="s-sub">apparaten</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">WATCH</div>
-          <div class="s-value" id="s-watch" style="color:var(--watch)">0</div>
-          <div class="s-sub">apparaten</div>
+    <!-- Results Summary -->
+    <div id="batch-results-summary" style="display:none;">
+      <div class="form-section">
+        <div class="form-section-title">📊 RESULTATEN</div>
+        <div class="results-summary-bar">
+          <span class="summary-stat"><strong id="br-total-assets">0</strong> assets</span>
+          <span class="summary-stat"><strong id="br-total-qty">0</strong> stuks</span>
+          <span class="summary-stat">Totaal ERP: <strong id="br-total-erp">€0</strong></span>
+          <span class="summary-stat">Bandbreedte: <strong id="br-bandwidth">€0 - €0</strong></span>
         </div>
       </div>
 
-      <div class="table-actions">
-        <button class="btn btn-primary btn-sm" id="btn-report">Generate Report</button>
-        <button class="btn btn-ghost btn-sm" id="btn-csv">Export CSV</button>
-        <button class="btn btn-ghost btn-sm" id="btn-reset">New Analysis</button>
-      </div>
-
-      <div class="table-wrapper">
-        <table>
+      <!-- Results Table -->
+      <div class="batch-table-wrap">
+        <table class="batch-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Model</th>
-              <th>Gen</th>
-              <th>RAM</th>
-              <th>SSD</th>
+              <th>Qty</th>
+              <th>Asset</th>
+              <th>Specs</th>
               <th>Grade</th>
-              <th>Status</th>
-              <th>ERP</th>
-              <th>Prijsband</th>
+              <th>KB</th>
+              <th>Hist. ERP</th>
+              <th>Match</th>
+              <th>Conf.</th>
+              <th>Live</th>
+              <th>Totaal</th>
             </tr>
           </thead>
-          <tbody id="results-body"></tbody>
+          <tbody id="batch-results-body"></tbody>
+          <tfoot>
+            <tr class="totals-row">
+              <td id="br-foot-qty">0</td>
+              <td colspan="4"><strong>TOTAAL</strong></td>
+              <td id="br-foot-hist">-</td>
+              <td colspan="2"></td>
+              <td></td>
+              <td id="br-foot-total"><strong>€0</strong></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
+
+      <!-- Export buttons -->
+      <div class="batch-actions" style="margin-top:16px;">
+        <button type="button" class="btn btn-ghost" onclick="resetBatchView()">🔄 Nieuwe Analyse</button>
+        <button type="button" class="btn btn-ghost" onclick="exportBatchCSV()">📥 Export CSV</button>
+        <button type="button" class="btn btn-ai" onclick="exportBatchExcel()">📊 Export Excel</button>
+      </div>
     </div>
+
   </div>
+</div>
 
 </div>
 
 <!-- Footer -->
 <div class="footer">
   <span data-i18n="footer">ERPIE PriceFinder · Made by Incredible Projects / Henk Jekel</span>
-  <span style="display:block;margin-top:4px;font-size:11px;opacity:0.6;">v1.3</span>
+  <span style="display:block;margin-top:4px;font-size:11px;opacity:0.6;">v2.0</span>
 </div>
 
 <!-- Help Modal -->
@@ -827,7 +1059,7 @@ tbody tr:last-child { border-bottom: none; }
   <div class="help-content">
     <button class="help-close" onclick="toggleHelp()">✕</button>
     <h2>🦞 ERPIE PriceFinder</h2>
-    <p class="version-info">Version 1.3 · Made by Incredible Projects / Henk Jekel</p>
+    <p class="version-info">Version 2.0 · Made by Incredible Projects / Henk Jekel</p>
     <h3>What is ERPIE?</h3>
     <p>ERPIE (Expected Resale Price Intelligence Engine) calculates the expected resale value of refurbished IT assets for the B2B market. It's designed for IT Asset Disposition (ITAD) companies.</p>
     <h3>How to use</h3>
@@ -852,6 +1084,7 @@ tbody tr:last-child { border-bottom: none; }
     <p>Enter a serial number to check warranty status and device specs on the manufacturer's support site.</p>
     <h3>Version History</h3>
     <ul class="version-history">
+      <li><strong>v2.0</strong> — Batch Upload v2.0: Universal Parser, Historical Pricing, Live Validation, CSV/Excel Export</li>
       <li><strong>v1.3</strong> — Help button, language switch, URL fixes, RefurbMe, BVA Auctions</li>
       <li><strong>v1.2</strong> — Live price check, serial number lookup</li>
       <li><strong>v1.1</strong> — Structured dropdowns, cascading selects</li>
@@ -864,6 +1097,7 @@ tbody tr:last-child { border-bottom: none; }
   </div>
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════════════
 // DATA DEFINITIONS
@@ -1428,175 +1662,785 @@ async function doAiQuote() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════
-// BATCH UPLOAD
-// ══════════════════════════════════════════════════════════════════════
-let batchResults = null;
-let batchSummary = null;
-
-const dropzone  = document.getElementById('dropzone');
-const fileInput = document.getElementById('file-input');
-
-dropzone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', e => { if (e.target.files[0]) uploadFile(e.target.files[0]); });
-
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-dropzone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropzone.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file) uploadFile(file);
-});
-
-async function uploadFile(file) {
-  const region = document.getElementById('b-region').value;
-
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('batch-results').style.display = 'none';
-  dropzone.style.display = 'none';
-
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('region', region);
-
-  try {
-    const res  = await fetch('/erpie/api/analyze', { method: 'POST', body: fd });
-    const data = await res.json();
-
-    if (!data.ok) throw new Error(data.error);
-
-    batchResults = data.results;
-    batchSummary = data.summary;
-    showBatchResults(data.results, data.summary);
-  } catch (err) {
-    alert('Fout bij verwerken: ' + err.message);
-    resetBatch();
-  } finally {
-    document.getElementById('loading').style.display = 'none';
-  }
-}
-
-function showBatchResults(results, summary) {
-  document.getElementById('s-total').textContent = summary.total;
-  document.getElementById('s-value').textContent = '\u20ac' + summary.totalValue.toLocaleString('nl-NL');
-  document.getElementById('s-avg').textContent   = '\u20ac' + summary.avgValue.toLocaleString('nl-NL');
-  document.getElementById('s-go').textContent    = summary.goCount;
-  document.getElementById('s-watch').textContent = summary.watchCount;
-
-  const tbody = document.getElementById('results-body');
-  tbody.innerHTML = results.map((r, i) => `
-    <tr class="row-${r.status}">
-      <td>${i + 1}</td>
-      <td>${esc(r.model)}</td>
-      <td>${esc(r.gen || '\u2013')}</td>
-      <td>${r.ramGb ? r.ramGb + ' GB' : '\u2013'}</td>
-      <td>${r.ssdGb ? (r.ssdGb >= 1024 ? r.ssdGb / 1024 + ' TB' : r.ssdGb + ' GB') : '\u2013'}</td>
-      <td>${esc(r.grade || '\u2013')}</td>
-      <td><span class="pill-sm pill-${r.status}">${r.status}</span></td>
-      <td>\u20ac${(r.advisedPrice || 0).toLocaleString('nl-NL')}</td>
-      <td>\u20ac${(r.priceLow || 0).toLocaleString('nl-NL')} \u2013 \u20ac${(r.priceHigh || 0).toLocaleString('nl-NL')}</td>
-    </tr>`).join('');
-
-  document.getElementById('batch-results').style.display = 'block';
-}
-
 function esc(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// Report
-document.getElementById('btn-report').addEventListener('click', async () => {
-  if (!batchResults) return;
-  const dealName = prompt('Deal naam:', 'ERPIE Deal') || 'ERPIE Deal';
-  const res = await fetch('/erpie/api/report', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ devices: batchResults, summary: batchSummary, dealName }),
-  });
-  const html = await res.text();
-  const win  = window.open('', '_blank');
-  win.document.write(html);
-  win.document.close();
+// ══════════════════════════════════════════════════════════════════════
+// BATCH UPLOAD v2.0 — Universal Parser + Historical + Live Validation
+// ══════════════════════════════════════════════════════════════════════
+
+// ── Pattern definitions ──────────────────────────────────────────
+const BATCH_PATTERNS = {
+  quantity: [
+    /^(\d+)\s*[xX×]\s*/,
+    /^(\d+)\s*(?:stuks?|pcs?|st)\s*/i,
+  ],
+  brand: {
+    'Dell': /\b(dell)\b/i,
+    'HP': /\b(hp|hewlett[\s-]?packard)\b/i,
+    'Lenovo': /\b(lenovo|thinkpad|ideapad)\b/i,
+    'Apple': /\b(apple|mac|macbook|imac)\b/i,
+    'Microsoft': /\b(microsoft|surface)\b/i,
+    'Asus': /\b(asus)\b/i,
+    'Acer': /\b(acer)\b/i,
+    'Fujitsu': /\b(fujitsu)\b/i,
+  },
+  model: [
+    // Dell
+    { re: /\b(lat(?:itude)?)\s*(\d{4})\b/i, brand: 'Dell', family: 'Latitude', fn: (m) => `Latitude ${m[2]}` },
+    { re: /\b(prec(?:ision)?)\s*(\d{4})\b/i, brand: 'Dell', family: 'Precision', fn: (m) => `Precision ${m[2]}` },
+    { re: /\b(opti(?:plex)?)\s*(\d{4})\b/i, brand: 'Dell', family: 'OptiPlex', fn: (m) => `OptiPlex ${m[2]}` },
+    { re: /\b(xps)\s*(\d{2})\b/i, brand: 'Dell', family: 'XPS', fn: (m) => `XPS ${m[2]}` },
+    // HP
+    { re: /\b(elite\s*book)\s*(\d{3,4})\s*(g\d+)?/i, brand: 'HP', family: 'EliteBook', fn: (m) => `EliteBook ${m[2]}${m[3] ? ' ' + m[3].toUpperCase() : ''}` },
+    { re: /\b(pro\s*book)\s*(\d{3})\s*(g\d+)?/i, brand: 'HP', family: 'ProBook', fn: (m) => `ProBook ${m[2]}${m[3] ? ' ' + m[3].toUpperCase() : ''}` },
+    { re: /\b(z\s*book)\s*(\w+)\s*(g\d+)?/i, brand: 'HP', family: 'ZBook', fn: (m) => `ZBook ${m[2]}${m[3] ? ' ' + m[3].toUpperCase() : ''}` },
+    { re: /\b(elite\s*dragonfly)\b/i, brand: 'HP', family: 'Dragonfly', fn: () => 'Elite Dragonfly' },
+    // Lenovo
+    { re: /\bthinkpad\s*(t\d{2}s?)\s*(gen\s*\d+)?/i, brand: 'Lenovo', family: 'ThinkPad', fn: (m) => `ThinkPad ${m[1].toUpperCase()}${m[2] ? ' ' + m[2] : ''}` },
+    { re: /\bthinkpad\s*(x1)\s*(carbon|yoga)\s*(g(?:en)?\s*\d+)?/i, brand: 'Lenovo', family: 'ThinkPad', fn: (m) => `ThinkPad X1 ${m[2]}${m[3] ? ' ' + m[3] : ''}` },
+    { re: /\bthinkpad\s*(l\d{2})\s*(gen\s*\d+)?/i, brand: 'Lenovo', family: 'ThinkPad', fn: (m) => `ThinkPad ${m[1].toUpperCase()}${m[2] ? ' ' + m[2] : ''}` },
+    { re: /\bthinkpad\s*(p\d{2}s?)\s*(gen\s*\d+)?/i, brand: 'Lenovo', family: 'ThinkPad', fn: (m) => `ThinkPad ${m[1].toUpperCase()}${m[2] ? ' ' + m[2] : ''}` },
+    { re: /\b(t\d{2}s?)\s+(gen\s*\d+)/i, brand: 'Lenovo', family: 'ThinkPad', fn: (m) => `ThinkPad ${m[1].toUpperCase()} ${m[2]}` },
+    { re: /\b(x1)\s*(carbon|yoga)/i, brand: 'Lenovo', family: 'ThinkPad', fn: (m) => `ThinkPad X1 ${m[2]}` },
+    // Apple
+    { re: /\b(macbook\s*pro)\s*(\d{2,3}[\."']?)\s*/i, brand: 'Apple', family: 'MacBook Pro', fn: (m) => `MacBook Pro ${m[2].replace(/[\"']/g, '"')}` },
+    { re: /\b(macbook\s*pro)\b/i, brand: 'Apple', family: 'MacBook Pro', fn: () => 'MacBook Pro' },
+    { re: /\b(macbook\s*air)\b/i, brand: 'Apple', family: 'MacBook Air', fn: () => 'MacBook Air' },
+    { re: /\b(imac)\s*(\d{2}[\."']?)?/i, brand: 'Apple', family: 'iMac', fn: (m) => `iMac${m[2] ? ' ' + m[2] : ''}` },
+    { re: /\b(mac\s*mini)\b/i, brand: 'Apple', family: 'Mac Mini', fn: () => 'Mac Mini' },
+    // Microsoft
+    { re: /\b(surface\s*pro)\s*(\d+)?/i, brand: 'Microsoft', family: 'Surface', fn: (m) => `Surface Pro${m[2] ? ' ' + m[2] : ''}` },
+    { re: /\b(surface\s*laptop)\s*(\d+)?/i, brand: 'Microsoft', family: 'Surface', fn: (m) => `Surface Laptop${m[2] ? ' ' + m[2] : ''}` },
+    { re: /\b(surface\s*book)\s*(\d+)?/i, brand: 'Microsoft', family: 'Surface', fn: (m) => `Surface Book${m[2] ? ' ' + m[2] : ''}` },
+  ],
+  cpu: {
+    intel_full: /\b(i[3579])-?(\d{4,5})([a-z]*)\b/i,
+    intel_simple: /\b(i[3579])\b/i,
+    apple_m: /\b(m[1234])\s*(pro|max|ultra)?\b/i,
+    amd_ryzen: /\b(ryzen)\s*([3579])\s*(\d{4}[a-z]*)?/i,
+  },
+  ram: [
+    /\b(\d{1,3})\s*(?:gb|g)\s*(?:ram|ddr\d?)?/i,
+    /\b(\d{1,2})[\/\\](\d{3,4})\b/,
+  ],
+  storage: [
+    /\b(\d{3,4})\s*(?:gb|g)\s*(?:ssd|nvme|hdd)?/i,
+    /\b([12])\s*(?:tb|t)\b/i,
+  ],
+  grade: [
+    /\b(?:grade|gr\.?|conditie)\s*([a-d][+\-]?\d?)\b/i,
+    /\b([a-d])\s*-?\s*(?:grade|kwaliteit)\b/i,
+  ],
+  keyboard: {
+    'QWERTY EU': /\b(qwerty)\s*(eu|int(?:ernational)?|nl|uk)?\b/i,
+    'QWERTY US': /\b(qwerty)\s*(us|usa|ansi)\b/i,
+    'QWERTZ DE': /\b(qwertz)\s*(de|duits|german)?\b/i,
+    'QWERTZ CH': /\b(qwertz)\s*(ch|swiss|zwitsers)\b/i,
+    'AZERTY': /\b(azerty)\s*(be|fr)?\b/i,
+    'Nordic': /\b(nordic|scandinavian)\b/i,
+  },
+};
+
+// ── Grade normalization ──────────────────────────────────────────
+const GRADE_MAP = {
+  'a+': 'A', 'a': 'A', 'a-': 'A',
+  'b+': 'B', 'b': 'B', 'b4': 'B', 'b-': 'B',
+  'c+': 'C', 'c': 'C', 'c6': 'C', 'c-': 'C',
+  'd': 'D',
+};
+
+// ── Model → CPU gen lookup ───────────────────────────────────────
+const MODEL_CPU_GEN = {
+  'latitude 5530': { gen: 12, year: 2022 }, 'latitude 5540': { gen: 13, year: 2023 },
+  'latitude 5520': { gen: 11, year: 2021 }, 'latitude 5510': { gen: 10, year: 2020 },
+  'latitude 5420': { gen: 11, year: 2021 }, 'latitude 5410': { gen: 10, year: 2020 },
+  'latitude 7430': { gen: 12, year: 2022 }, 'latitude 7440': { gen: 13, year: 2023 },
+  'latitude 7420': { gen: 11, year: 2021 }, 'latitude 7410': { gen: 10, year: 2020 },
+  'elitebook 840 g9': { gen: 12, year: 2022 }, 'elitebook 840 g10': { gen: 13, year: 2023 },
+  'elitebook 840 g8': { gen: 11, year: 2021 }, 'elitebook 840 g7': { gen: 10, year: 2020 },
+  'elitebook 845 g7': { gen: 'AMD 4th', year: 2020 }, 'elitebook 845 g8': { gen: 'AMD 5th', year: 2021 },
+  'elitebook 845 g9': { gen: 'AMD 6th', year: 2022 },
+  'probook 450 g7': { gen: 10, year: 2020 }, 'probook 450 g8': { gen: 11, year: 2021 },
+  'probook 450 g9': { gen: 12, year: 2022 },
+  'thinkpad t14 gen 1': { gen: 10, year: 2020 }, 'thinkpad t14 gen 2': { gen: 11, year: 2021 },
+  'thinkpad t14 gen 3': { gen: 12, year: 2022 }, 'thinkpad t14 gen 4': { gen: 13, year: 2023 },
+  'thinkpad x1 carbon g9': { gen: 11, year: 2021 }, 'thinkpad x1 carbon g10': { gen: 12, year: 2022 },
+  'thinkpad x1 carbon g11': { gen: 13, year: 2023 },
+};
+
+// ── Sample Historical Data (Phase 2 - placeholder until CSV loaded) ──
+const HISTORICAL_DATA = [
+  { brand: 'Dell', model: 'Latitude 5530', cpu: 'i5', cpuModel: 'i5-1245U', cpuGen: 12, ram: 16, storage: 256, grade: 'B', price: 285, date: '2024-08-15' },
+  { brand: 'Dell', model: 'Latitude 5530', cpu: 'i5', cpuModel: 'i5-1245U', cpuGen: 12, ram: 16, storage: 256, grade: 'B', price: 295, date: '2024-09-01' },
+  { brand: 'Dell', model: 'Latitude 5530', cpu: 'i5', cpuModel: 'i5-1245U', cpuGen: 12, ram: 16, storage: 256, grade: 'A', price: 320, date: '2024-09-15' },
+  { brand: 'Dell', model: 'Latitude 5530', cpu: 'i5', cpuModel: 'i5-1245U', cpuGen: 12, ram: 16, storage: 512, grade: 'A', price: 345, date: '2024-10-01' },
+  { brand: 'Dell', model: 'Latitude 5530', cpu: 'i7', cpuModel: 'i7-1265U', cpuGen: 12, ram: 16, storage: 256, grade: 'B', price: 310, date: '2024-08-20' },
+  { brand: 'Dell', model: 'Latitude 5420', cpu: 'i5', cpuModel: 'i5-1135G7', cpuGen: 11, ram: 8, storage: 256, grade: 'B', price: 195, date: '2024-07-10' },
+  { brand: 'Dell', model: 'Latitude 5420', cpu: 'i5', cpuModel: 'i5-1135G7', cpuGen: 11, ram: 8, storage: 256, grade: 'C', price: 155, date: '2024-06-20' },
+  { brand: 'Dell', model: 'Latitude 5420', cpu: 'i5', cpuModel: 'i5-1135G7', cpuGen: 11, ram: 16, storage: 256, grade: 'B', price: 220, date: '2024-09-01' },
+  { brand: 'Dell', model: 'Latitude 5410', cpu: 'i5', cpuModel: 'i5-10310U', cpuGen: 10, ram: 16, storage: 256, grade: 'B', price: 200, date: '2024-06-15' },
+  { brand: 'Dell', model: 'Latitude 7430', cpu: 'i5', cpuModel: 'i5-1245U', cpuGen: 12, ram: 16, storage: 256, grade: 'A', price: 370, date: '2024-10-01' },
+  { brand: 'Dell', model: 'Latitude 7430', cpu: 'i7', cpuModel: 'i7-1265U', cpuGen: 12, ram: 16, storage: 512, grade: 'A', price: 420, date: '2024-10-10' },
+  { brand: 'HP', model: 'EliteBook 840 G9', cpu: 'i5', cpuModel: 'i5-1245U', cpuGen: 12, ram: 16, storage: 256, grade: 'A', price: 340, date: '2024-09-01' },
+  { brand: 'HP', model: 'EliteBook 840 G9', cpu: 'i5', cpuModel: 'i5-1245U', cpuGen: 12, ram: 16, storage: 512, grade: 'A', price: 365, date: '2024-09-15' },
+  { brand: 'HP', model: 'EliteBook 840 G9', cpu: 'i5', cpuModel: 'i5-1245U', cpuGen: 12, ram: 16, storage: 256, grade: 'B', price: 310, date: '2024-08-20' },
+  { brand: 'HP', model: 'EliteBook 840 G8', cpu: 'i5', cpuModel: 'i5-1135G7', cpuGen: 11, ram: 16, storage: 256, grade: 'B', price: 255, date: '2024-07-15' },
+  { brand: 'HP', model: 'EliteBook 840 G7', cpu: 'i5', cpuModel: 'i5-10310U', cpuGen: 10, ram: 16, storage: 256, grade: 'B', price: 205, date: '2024-06-01' },
+  { brand: 'HP', model: 'EliteBook 845 G7', cpu: 'ryzen5', cpuModel: 'Ryzen 5 4650U', cpuGen: 'AMD 4th', ram: 16, storage: 256, grade: 'B', price: 200, date: '2024-05-15' },
+  { brand: 'HP', model: 'ProBook 450 G8', cpu: 'i5', cpuModel: 'i5-1135G7', cpuGen: 11, ram: 16, storage: 512, grade: 'B', price: 215, date: '2024-07-01' },
+  { brand: 'HP', model: 'ProBook 450 G7', cpu: 'i5', cpuModel: 'i5-10210U', cpuGen: 10, ram: 16, storage: 256, grade: 'B', price: 210, date: '2024-05-10' },
+  { brand: 'Lenovo', model: 'ThinkPad T14 Gen 3', cpu: 'i7', cpuModel: 'i7-1265U', cpuGen: 12, ram: 32, storage: 512, grade: 'A', price: 395, date: '2024-10-01' },
+  { brand: 'Lenovo', model: 'ThinkPad T14 Gen 2', cpu: 'i5', cpuModel: 'i5-1135G7', cpuGen: 11, ram: 16, storage: 256, grade: 'B', price: 230, date: '2024-07-15' },
+  { brand: 'Lenovo', model: 'ThinkPad T14 Gen 1', cpu: 'i5', cpuModel: 'i5-10210U', cpuGen: 10, ram: 16, storage: 256, grade: 'B', price: 210, date: '2024-05-01' },
+  { brand: 'Lenovo', model: 'ThinkPad X1 Carbon G10', cpu: 'i7', cpuModel: 'i7-1265U', cpuGen: 12, ram: 16, storage: 512, grade: 'A', price: 450, date: '2024-10-15' },
+  { brand: 'Apple', model: 'MacBook Pro 14"', cpu: 'm1', cpuModel: 'M1 Pro', cpuGen: 'M1 Pro', ram: 16, storage: 512, grade: 'A', price: 980, date: '2024-09-01' },
+  { brand: 'Apple', model: 'MacBook Pro 14"', cpu: 'm1', cpuModel: 'M1 Pro', cpuGen: 'M1 Pro', ram: 16, storage: 512, grade: 'B', price: 890, date: '2024-08-15' },
+  { brand: 'Apple', model: 'MacBook Air', cpu: 'm1', cpuModel: 'M1', cpuGen: 'M1', ram: 8, storage: 256, grade: 'A', price: 520, date: '2024-08-01' },
+  { brand: 'Apple', model: 'MacBook Air', cpu: 'm2', cpuModel: 'M2', cpuGen: 'M2', ram: 8, storage: 256, grade: 'A', price: 680, date: '2024-10-01' },
+];
+
+// ── Batch state ──────────────────────────────────────────────────
+let batchParsedGroups = [];
+
+// ── Drop zone setup ──────────────────────────────────────────────
+const batchDropzone = document.getElementById('batch-dropzone');
+const batchFileInput = document.getElementById('batch-file-input');
+
+batchDropzone.addEventListener('click', () => batchFileInput.click());
+batchFileInput.addEventListener('change', e => {
+  if (e.target.files[0]) handleBatchFile(e.target.files[0]);
+});
+batchDropzone.addEventListener('dragover', e => { e.preventDefault(); batchDropzone.classList.add('drag-over'); });
+batchDropzone.addEventListener('dragleave', () => batchDropzone.classList.remove('drag-over'));
+batchDropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  batchDropzone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleBatchFile(e.dataTransfer.files[0]);
 });
 
-// CSV export
-document.getElementById('btn-csv').addEventListener('click', () => {
-  if (!batchResults) return;
-  const header = ['Model','Gen','RAM GB','SSD GB','Grade','Status','ERP','Price Low','Price High'];
-  const rows   = batchResults.map(r => [
-    r.model, r.gen, r.ramGb, r.ssdGb, r.grade, r.status,
-    r.advisedPrice, r.priceLow, r.priceHigh
-  ].map(v => `"${String(v || '').replace(/"/g,'""')}"`).join(','));
-  const csv  = [header.join(','), ...rows].join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a'); a.href = url; a.download = 'erpie-export.csv';
-  a.click(); URL.revokeObjectURL(url);
-});
-
-// Reset
-document.getElementById('btn-reset').addEventListener('click', resetBatch);
-function resetBatch() {
-  batchResults = null; batchSummary = null;
-  document.getElementById('batch-results').style.display = 'none';
-  document.getElementById('loading').style.display = 'none';
-  dropzone.style.display = 'block';
-  fileInput.value = '';
+async function handleBatchFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'csv' || ext === 'txt') {
+    const text = await file.text();
+    document.getElementById('batch-input').value = text;
+  } else if (ext === 'xlsx' || ext === 'xls') {
+    // SheetJS required for Excel
+    if (typeof XLSX === 'undefined') {
+      alert('Excel support requires SheetJS library. Please paste as text or use CSV.');
+      return;
+    }
+    const data = await file.arrayBuffer();
+    const wb = XLSX.read(data);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const text = XLSX.utils.sheet_to_csv(ws);
+    document.getElementById('batch-input').value = text;
+  }
 }
 
-// ── Text input mode ──────────────────────────────────────────────
-function setInputMode(mode) {
-  const fileBtn = document.getElementById('mode-file');
-  const textBtn = document.getElementById('mode-text');
-  const dropzone = document.getElementById('dropzone');
-  const textArea = document.getElementById('text-input-area');
+// ── Example data ─────────────────────────────────────────────────
+function loadBatchExample() {
+  document.getElementById('batch-input').value = `50x Dell Latitude 5530 i5-1245U 16GB 256GB Grade B QWERTY
+25x HP EliteBook 840 G9 i5 16/512 A-grade
+10x Lenovo ThinkPad T14 Gen 3 i7 32GB 512GB Grade A
+15x Apple MacBook Pro 14" M1 Pro 16GB 512GB Grade A
+8x Dell Latitude 5420 i5-1135G7 8GB 256GB C-grade
+12x HP ProBook 450 G8 i5-1135G7 16GB 512GB B-grade`;
+}
 
-  if (mode === 'text') {
-    textBtn.style.border = '2px solid var(--accent)';
-    textBtn.style.background = 'var(--accent)';
-    textBtn.style.color = '#fff';
-    fileBtn.style.border = '2px solid var(--border)';
-    fileBtn.style.background = 'transparent';
-    fileBtn.style.color = 'var(--muted)';
-    dropzone.style.display = 'none';
-    textArea.style.display = 'block';
+function clearBatchInput() {
+  document.getElementById('batch-input').value = '';
+  document.getElementById('processing-stream').style.display = 'none';
+  document.getElementById('processing-stream').innerHTML = '';
+  document.getElementById('batch-results-summary').style.display = 'none';
+  batchParsedGroups = [];
+}
+
+function resetBatchView() {
+  clearBatchInput();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// UNIVERSAL PARSER
+// ══════════════════════════════════════════════════════════════════
+
+function parseLine(line) {
+  line = line.trim();
+  if (!line || line.startsWith('#') || line.startsWith('//')) return null;
+
+  const asset = {
+    rawInput: line,
+    quantity: 1,
+    brand: '',
+    model: '',
+    modelFamily: '',
+    cpuVendor: '',
+    cpuTier: '',
+    cpuModel: '',
+    cpuGen: null,
+    cpuYear: null,
+    cpuInferred: false,
+    ram: null,
+    storage: null,
+    grade: '',
+    keyboard: '',
+    keyboardWarning: null,
+    warnings: [],
+    confidence: 0,
+  };
+
+  let remaining = line;
+
+  // 1. Quantity
+  for (const pat of BATCH_PATTERNS.quantity) {
+    const m = remaining.match(pat);
+    if (m) {
+      asset.quantity = parseInt(m[1]);
+      remaining = remaining.slice(m[0].length);
+      break;
+    }
+  }
+
+  // 2. Brand
+  for (const [brandName, pat] of Object.entries(BATCH_PATTERNS.brand)) {
+    if (pat.test(remaining)) {
+      asset.brand = brandName;
+      break;
+    }
+  }
+
+  // 3. Model
+  for (const mp of BATCH_PATTERNS.model) {
+    const m = remaining.match(mp.re);
+    if (m) {
+      asset.model = mp.fn(m);
+      asset.modelFamily = mp.family;
+      if (!asset.brand) asset.brand = mp.brand;
+      break;
+    }
+  }
+
+  // 4. CPU
+  const cpuFull = remaining.match(BATCH_PATTERNS.cpu.intel_full);
+  if (cpuFull) {
+    asset.cpuVendor = 'Intel';
+    asset.cpuTier = cpuFull[1].toLowerCase();
+    asset.cpuModel = `${cpuFull[1]}-${cpuFull[2]}${cpuFull[3] || ''}`;
+    // Infer gen from model number
+    const firstDigits = cpuFull[2].toString();
+    if (firstDigits.length === 5) asset.cpuGen = parseInt(firstDigits.substring(0, 2));
+    else if (firstDigits.length === 4) asset.cpuGen = parseInt(firstDigits[0]);
   } else {
-    fileBtn.style.border = '2px solid var(--accent)';
-    fileBtn.style.background = 'var(--accent)';
-    fileBtn.style.color = '#fff';
-    textBtn.style.border = '2px solid var(--border)';
-    textBtn.style.background = 'transparent';
-    textBtn.style.color = 'var(--muted)';
-    dropzone.style.display = 'block';
-    textArea.style.display = 'none';
+    const cpuSimple = remaining.match(BATCH_PATTERNS.cpu.intel_simple);
+    if (cpuSimple) {
+      asset.cpuVendor = 'Intel';
+      asset.cpuTier = cpuSimple[1].toLowerCase();
+      asset.cpuModel = cpuSimple[1];
+    }
+    const appleM = remaining.match(BATCH_PATTERNS.cpu.apple_m);
+    if (appleM) {
+      asset.cpuVendor = 'Apple';
+      asset.cpuTier = appleM[1].toUpperCase();
+      asset.cpuModel = `${appleM[1].toUpperCase()}${appleM[2] ? ' ' + appleM[2] : ''}`;
+      asset.cpuGen = asset.cpuModel;
+    }
+    const amdR = remaining.match(BATCH_PATTERNS.cpu.amd_ryzen);
+    if (amdR) {
+      asset.cpuVendor = 'AMD';
+      asset.cpuTier = `Ryzen ${amdR[2]}`;
+      asset.cpuModel = `Ryzen ${amdR[2]}${amdR[3] ? ' ' + amdR[3] : ''}`;
+    }
+  }
+
+  // 5. CPU Gen inference from model if not found
+  if (!asset.cpuGen && asset.model) {
+    const modelKey = asset.model.toLowerCase();
+    const lookup = MODEL_CPU_GEN[modelKey];
+    if (lookup) {
+      asset.cpuGen = lookup.gen;
+      asset.cpuYear = lookup.year;
+      asset.cpuInferred = true;
+      asset.warnings.push('CPU gen inferred from model');
+    }
+  }
+
+  // 6. RAM
+  for (const pat of BATCH_PATTERNS.ram) {
+    const m = remaining.match(pat);
+    if (m) {
+      if (m[2]) {
+        // Format: 16/256 → RAM/SSD
+        asset.ram = parseInt(m[1]);
+        asset.storage = parseInt(m[2]);
+      } else {
+        const val = parseInt(m[1]);
+        if (val <= 128 && [4, 8, 16, 32, 64, 128].includes(val)) {
+          asset.ram = val;
+        }
+      }
+      break;
+    }
+  }
+
+  // 7. Storage
+  if (!asset.storage) {
+    for (const pat of BATCH_PATTERNS.storage) {
+      const m = remaining.match(pat);
+      if (m) {
+        const val = parseInt(m[1]);
+        if (val <= 4 && /tb/i.test(remaining.slice(m.index, m.index + m[0].length + 5))) {
+          asset.storage = val * 1024;
+        } else if (val >= 128) {
+          asset.storage = val;
+        }
+        break;
+      }
+    }
+  }
+
+  // 8. Grade
+  for (const pat of BATCH_PATTERNS.grade) {
+    const m = remaining.match(pat);
+    if (m) {
+      const raw = m[1].toLowerCase();
+      asset.grade = GRADE_MAP[raw] || raw.toUpperCase();
+      break;
+    }
+  }
+
+  // 9. Keyboard
+  for (const [kbName, pat] of Object.entries(BATCH_PATTERNS.keyboard)) {
+    if (pat.test(remaining)) {
+      asset.keyboard = kbName;
+      if (kbName === 'QWERTZ CH') {
+        asset.keyboardWarning = 'NO_RESALE';
+        asset.warnings.push('QWERTZ CH: No resale value (€0)');
+      } else if (kbName === 'QWERTZ DE' || kbName === 'Nordic') {
+        asset.keyboardWarning = 'LIMITED';
+        asset.warnings.push(`${kbName}: Limited market (-20%)`);
+      }
+      break;
+    }
+  }
+
+  // 10. Confidence calc
+  let conf = 0;
+  if (asset.brand) conf += 20;
+  if (asset.model) conf += 25;
+  if (asset.cpuTier) conf += 15;
+  if (asset.ram) conf += 15;
+  if (asset.storage) conf += 10;
+  if (asset.grade) conf += 10;
+  if (asset.cpuGen) conf += 5;
+  asset.confidence = conf;
+
+  // Warnings for missing fields
+  if (!asset.brand) asset.warnings.push('Brand not detected');
+  if (!asset.model) asset.warnings.push('Model not detected');
+  if (!asset.ram) asset.warnings.push('RAM not specified');
+  if (!asset.grade) asset.warnings.push('Grade not specified');
+
+  return asset;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// HISTORICAL PRICING (Phase 2)
+// ══════════════════════════════════════════════════════════════════
+
+function findHistoricalMatches(asset) {
+  const matches = { exact: [], model: [], family: [], tier: [] };
+
+  for (const deal of HISTORICAL_DATA) {
+    // Exact match
+    if (deal.brand === asset.brand &&
+        deal.model.toLowerCase() === asset.model.toLowerCase() &&
+        deal.cpu === asset.cpuTier &&
+        deal.ram === asset.ram &&
+        deal.grade === asset.grade) {
+      matches.exact.push(deal);
+      continue;
+    }
+    // Model match
+    if (deal.brand === asset.brand &&
+        deal.model.toLowerCase() === asset.model.toLowerCase() &&
+        deal.ram === asset.ram &&
+        deal.grade === asset.grade) {
+      matches.model.push(deal);
+      continue;
+    }
+    // Family match
+    if (deal.brand === asset.brand &&
+        asset.modelFamily &&
+        deal.model.toLowerCase().includes(asset.modelFamily.toLowerCase()) &&
+        Math.abs((deal.ram || 0) - (asset.ram || 0)) <= 8 &&
+        deal.grade === asset.grade) {
+      matches.family.push(deal);
+      continue;
+    }
+    // Tier match
+    if (deal.brand === asset.brand &&
+        deal.cpu === asset.cpuTier &&
+        Math.abs((deal.ram || 0) - (asset.ram || 0)) <= 8) {
+      matches.tier.push(deal);
+    }
+  }
+  return matches;
+}
+
+function calculateHistoricalERP(matches) {
+  let deals, matchLevel;
+  if (matches.exact.length >= 2) { deals = matches.exact; matchLevel = 'exact'; }
+  else if (matches.model.length >= 2) { deals = matches.model; matchLevel = 'model'; }
+  else if (matches.family.length >= 2) { deals = matches.family; matchLevel = 'family'; }
+  else if (matches.tier.length >= 2) { deals = matches.tier; matchLevel = 'tier'; }
+  else {
+    const all = [...matches.exact, ...matches.model, ...matches.family, ...matches.tier];
+    if (all.length > 0) { deals = all; matchLevel = 'tier'; }
+    else return { erp: null, matchLevel: 'none', sampleSize: 0, confidence: 0 };
+  }
+
+  const prices = deals.map(d => d.price).sort((a, b) => a - b);
+
+  // IQR outlier removal
+  const q1i = Math.floor(prices.length * 0.25);
+  const q3i = Math.floor(prices.length * 0.75);
+  const q1 = prices[q1i], q3 = prices[q3i];
+  const iqr = q3 - q1;
+  const filtered = prices.filter(p => p >= q1 - 1.5 * iqr && p <= q3 + 1.5 * iqr);
+
+  // Median
+  const mid = Math.floor(filtered.length / 2);
+  const median = filtered.length % 2 === 0
+    ? (filtered[mid - 1] + filtered[mid]) / 2
+    : filtered[mid];
+
+  // Depreciation: 2% per month from average deal date
+  const avgDate = new Date(deals.reduce((sum, d) => sum + new Date(d.date).getTime(), 0) / deals.length);
+  const monthsSince = Math.max(0, ((new Date().getFullYear() - avgDate.getFullYear()) * 12 + new Date().getMonth() - avgDate.getMonth()));
+  const depFactor = Math.pow(0.98, monthsSince);
+  const erp = Math.round(median * depFactor);
+
+  // Confidence
+  const baseConf = { exact: 95, model: 85, family: 70, tier: 50 };
+  let conf = baseConf[matchLevel] || 50;
+  if (filtered.length < 3) conf *= 0.7;
+  else if (filtered.length < 5) conf *= 0.85;
+  conf = Math.round(conf);
+
+  return {
+    erp,
+    rawMedian: Math.round(median),
+    matchLevel,
+    sampleSize: filtered.length,
+    confidence: conf,
+    depreciationMonths: monthsSince,
+    depreciationPercent: Math.round((1 - depFactor) * 100),
+    priceRange: {
+      min: Math.round(filtered[0] * depFactor),
+      max: Math.round(filtered[filtered.length - 1] * depFactor),
+    },
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LIVE VALIDATION HELPERS (Phase 3)
+// ══════════════════════════════════════════════════════════════════
+
+function buildBatchSearchQuery(asset) {
+  const parts = [asset.brand, asset.model];
+  if (asset.cpuModel && !asset.cpuInferred) parts.push(asset.cpuModel);
+  else if (asset.cpuTier) parts.push(asset.cpuTier);
+  if (asset.ram) parts.push(asset.ram + 'GB');
+  return encodeURIComponent(parts.join(' ').trim());
+}
+
+function openBatchGoogle(idx) {
+  const a = batchParsedGroups[idx];
+  if (!a) return;
+  window.open(`https://www.google.com/search?q=${buildBatchSearchQuery(a)}+refurbished+price`, '_blank');
+}
+function openBatchITGigant(idx) {
+  const a = batchParsedGroups[idx];
+  if (!a) return;
+  window.open(`https://www.itgigant.nl/catalogsearch/result/?q=${buildBatchSearchQuery(a)}`, '_blank');
+}
+function openBatchBackMarket(idx) {
+  const a = batchParsedGroups[idx];
+  if (!a) return;
+  window.open(`https://www.backmarket.nl/nl-nl/search?q=${buildBatchSearchQuery(a)}`, '_blank');
+}
+function openBatchRefurbMe(idx) {
+  const a = batchParsedGroups[idx];
+  if (!a) return;
+  window.open(`https://www.refurb.me/en/search?q=${buildBatchSearchQuery(a)}`, '_blank');
+}
+function openBatchRefurbed(idx) {
+  const a = batchParsedGroups[idx];
+  if (!a) return;
+  window.open(`https://www.refurbed.nl/q/${buildBatchSearchQuery(a)}/`, '_blank');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MAIN PROCESS FUNCTION
+// ══════════════════════════════════════════════════════════════════
+
+async function processBatch() {
+  const input = document.getElementById('batch-input').value.trim();
+  if (!input) { alert('Voer eerst asset data in of laad een voorbeeld.'); return; }
+
+  const stream = document.getElementById('processing-stream');
+  const summary = document.getElementById('batch-results-summary');
+  stream.innerHTML = '';
+  stream.style.display = 'flex';
+  summary.style.display = 'none';
+  batchParsedGroups = [];
+
+  const lines = input.split('\n').filter(l => l.trim());
+
+  // Parse all lines
+  for (let i = 0; i < lines.length; i++) {
+    const asset = parseLine(lines[i]);
+    if (!asset) continue;
+
+    asset.index = batchParsedGroups.length;
+    batchParsedGroups.push(asset);
+
+    // Add streaming card (processing)
+    addStreamCard(asset, 'processing');
+    await new Promise(r => setTimeout(r, 80)); // Small delay for animation
+
+    // Historical pricing
+    const hist = findHistoricalMatches(asset);
+    asset.historical = calculateHistoricalERP(hist);
+
+    // Update card with results
+    updateStreamCardComplete(asset);
+  }
+
+  // Show results table
+  if (batchParsedGroups.length > 0) {
+    showBatchResultsTable();
   }
 }
 
-async function analyzeText() {
-  const text = document.getElementById('batch-text').value.trim();
-  if (!text) return alert('Voer eerst een device lijst in.');
-  const region = document.getElementById('b-region').value;
+// ── Streaming Card UI ────────────────────────────────────────────
 
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('batch-results').style.display = 'none';
+function addStreamCard(asset, status) {
+  const stream = document.getElementById('processing-stream');
+  const card = document.createElement('div');
+  card.className = `stream-card status-${status}`;
+  card.id = `stream-card-${asset.index}`;
 
-  try {
-    const res  = await fetch('/erpie/api/analyze-text', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, region }),
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error);
-    batchResults = data.results;
-    batchSummary = data.summary;
-    showBatchResults(data.results, data.summary);
-  } catch (err) {
-    alert('Fout bij verwerken: ' + err.message);
-  } finally {
-    document.getElementById('loading').style.display = 'none';
+  const specsStr = [
+    asset.cpuModel || asset.cpuTier,
+    asset.ram ? asset.ram + 'GB' : null,
+    asset.storage ? (asset.storage >= 1024 ? (asset.storage/1024) + 'TB' : asset.storage + 'GB') : null,
+    asset.grade ? 'Grade ' + asset.grade : null,
+  ].filter(Boolean).join(' · ');
+
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="card-qty">${asset.quantity}×</span>
+      <span class="card-model">${esc(asset.brand)} ${esc(asset.model || '?')}</span>
+      <span class="card-status">⏳</span>
+    </div>
+    <div class="card-specs">${esc(specsStr) || 'Parsing...'}</div>
+    <div class="card-pricing">
+      <div class="card-price-row">
+        <span class="card-price-label">Historisch:</span>
+        <span class="card-price-value">zoeken...</span>
+      </div>
+    </div>
+  `;
+  stream.appendChild(card);
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function updateStreamCardComplete(asset) {
+  const card = document.getElementById(`stream-card-${asset.index}`);
+  if (!card) return;
+
+  const h = asset.historical;
+  const hasWarning = asset.warnings.length > 0;
+  const hasKeyboardWarning = asset.keyboardWarning === 'NO_RESALE';
+
+  card.className = `stream-card ${hasKeyboardWarning ? 'status-warning' : (hasWarning && !h.erp ? 'status-warning' : 'status-complete')}`;
+
+  const totalERP = h.erp ? h.erp * asset.quantity : null;
+  const confColor = h.confidence >= 70 ? 'conf-high' : (h.confidence >= 50 ? 'conf-medium' : 'conf-low');
+  const confBarColor = h.confidence >= 70 ? '#22c55e' : (h.confidence >= 50 ? '#f59e0b' : '#ef4444');
+
+  const specsStr = [
+    asset.cpuModel || asset.cpuTier,
+    asset.ram ? asset.ram + 'GB' : null,
+    asset.storage ? (asset.storage >= 1024 ? (asset.storage/1024) + 'TB' : asset.storage + 'GB') : null,
+    asset.grade ? 'Grade ' + asset.grade : null,
+    asset.keyboard || null,
+  ].filter(Boolean).join(' · ');
+
+  let pricingHTML = '';
+  if (h.erp) {
+    pricingHTML = `
+      <div class="card-price-row">
+        <span class="card-price-label">Historisch:</span>
+        <span class="card-price-value">€${h.erp}</span>
+        <span class="card-price-range">(${h.sampleSize} deals, ${h.depreciationPercent}% dep.)</span>
+      </div>
+      <div class="card-price-row">
+        <span class="card-price-label">Bandbreedte:</span>
+        <span class="card-price-value">€${h.priceRange.min} - €${h.priceRange.max}</span>
+      </div>
+      <div class="card-price-row total">
+        <span class="card-price-label">Totaal (${asset.quantity}×):</span>
+        <span class="card-price-value">€${totalERP.toLocaleString('nl-NL')}</span>
+      </div>
+    `;
+  } else {
+    pricingHTML = `
+      <div class="card-price-row">
+        <span class="card-price-label">Historisch:</span>
+        <span class="card-price-value" style="color:var(--muted)">Geen data</span>
+      </div>
+    `;
   }
+
+  // Live check buttons
+  const liveButtons = `
+    <div class="card-live-buttons">
+      <button class="card-live-btn" onclick="openBatchGoogle(${asset.index})">🔎 Google</button>
+      <button class="card-live-btn" onclick="openBatchITGigant(${asset.index})">🏢 IT Gigant</button>
+      <button class="card-live-btn" onclick="openBatchBackMarket(${asset.index})">📦 Back Market</button>
+      ${asset.brand === 'Apple' ? `<button class="card-live-btn" onclick="openBatchRefurbMe(${asset.index})">🍎 RefurbMe</button>` : `<button class="card-live-btn" onclick="openBatchRefurbed(${asset.index})">♻️ Refurbed</button>`}
+    </div>
+  `;
+
+  const warningsHTML = asset.warnings.length > 0
+    ? `<div class="card-warning-msg">${asset.warnings.map(w => '⚠️ ' + esc(w)).join('<br>')}</div>`
+    : '';
+
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="card-qty">${asset.quantity}×</span>
+      <span class="card-model">${esc(asset.brand)} ${esc(asset.model || '?')}</span>
+      <span class="card-status">${hasKeyboardWarning ? '🚫' : (h.erp ? '✅' : '⚠️')}</span>
+    </div>
+    <div class="card-specs">${esc(specsStr) || '—'}</div>
+    <div class="card-pricing">${pricingHTML}</div>
+    ${h.erp ? `
+    <div class="card-confidence">
+      <span class="match-badge match-${h.matchLevel}">${h.matchLevel}</span>
+      <div class="confidence-bar-wrap">
+        <div class="confidence-bar-fill" style="width:${h.confidence}%;background:${confBarColor}"></div>
+      </div>
+      <span class="confidence-text ${confColor}">${h.confidence}%</span>
+    </div>` : ''}
+    ${liveButtons}
+    ${warningsHTML}
+  `;
+}
+
+// ── Results Table ────────────────────────────────────────────────
+
+function showBatchResultsTable() {
+  const summary = document.getElementById('batch-results-summary');
+  summary.style.display = 'block';
+
+  let totalQty = 0, totalERP = 0, totalMin = 0, totalMax = 0;
+
+  const tbody = document.getElementById('batch-results-body');
+  tbody.innerHTML = batchParsedGroups.map((a, i) => {
+    const h = a.historical || {};
+    const unitERP = h.erp || 0;
+    const lineTotal = unitERP * a.quantity;
+    totalQty += a.quantity;
+    totalERP += lineTotal;
+    totalMin += (h.priceRange?.min || 0) * a.quantity;
+    totalMax += (h.priceRange?.max || 0) * a.quantity;
+
+    const confColor = (h.confidence || 0) >= 70 ? 'conf-high' : ((h.confidence || 0) >= 50 ? 'conf-medium' : 'conf-low');
+    const kbDisplay = a.keyboard || '—';
+    const kbClass = a.keyboardWarning === 'NO_RESALE' ? 'style="color:#ef4444;font-weight:700"' : (a.keyboardWarning === 'LIMITED' ? 'style="color:#f59e0b"' : '');
+
+    return `<tr>
+      <td>${a.quantity}</td>
+      <td><strong>${esc(a.brand)} ${esc(a.model || '?')}</strong></td>
+      <td>${esc([a.cpuModel || a.cpuTier, a.ram ? a.ram + 'GB' : '', a.storage ? a.storage + 'GB' : ''].filter(Boolean).join(' / '))}</td>
+      <td>${esc(a.grade || '—')}</td>
+      <td ${kbClass}>${esc(kbDisplay)}</td>
+      <td>${unitERP ? '€' + unitERP : '—'}</td>
+      <td>${h.matchLevel ? `<span class="match-badge match-${h.matchLevel}">${h.matchLevel}</span>` : '—'}</td>
+      <td class="${confColor}">${h.confidence ? h.confidence + '%' : '—'}</td>
+      <td>
+        <button class="card-live-btn" onclick="openBatchGoogle(${i})" title="Google">🔎</button>
+        <button class="card-live-btn" onclick="openBatchITGigant(${i})" title="IT Gigant">🏢</button>
+      </td>
+      <td><strong>${lineTotal ? '€' + lineTotal.toLocaleString('nl-NL') : '—'}</strong></td>
+    </tr>`;
+  }).join('');
+
+  // Update summary
+  document.getElementById('br-total-assets').textContent = batchParsedGroups.length;
+  document.getElementById('br-total-qty').textContent = totalQty;
+  document.getElementById('br-total-erp').textContent = '€' + totalERP.toLocaleString('nl-NL');
+  document.getElementById('br-bandwidth').textContent = '€' + totalMin.toLocaleString('nl-NL') + ' - €' + totalMax.toLocaleString('nl-NL');
+
+  // Footer
+  document.getElementById('br-foot-qty').textContent = totalQty;
+  document.getElementById('br-foot-hist').textContent = '—';
+  document.getElementById('br-foot-total').innerHTML = '<strong>€' + totalERP.toLocaleString('nl-NL') + '</strong>';
+
+  summary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Export Functions (Phase 3) ───────────────────────────────────
+
+function exportBatchCSV() {
+  if (!batchParsedGroups.length) return alert('Geen data om te exporteren.');
+  const header = ['Qty','Brand','Model','CPU','RAM','Storage','Grade','Keyboard','Hist ERP','Match Level','Confidence','Total ERP','Warnings'];
+  const rows = batchParsedGroups.map(a => {
+    const h = a.historical || {};
+    return [
+      a.quantity, a.brand, a.model, a.cpuModel || a.cpuTier,
+      a.ram ? a.ram + 'GB' : '', a.storage ? a.storage + 'GB' : '',
+      a.grade, a.keyboard, h.erp || '', h.matchLevel || '', h.confidence || '',
+      h.erp ? h.erp * a.quantity : '', a.warnings.join('; ')
+    ].map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(',');
+  });
+  const csv = [header.join(','), ...rows].join('\r\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `erpie-batch-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function exportBatchExcel() {
+  if (typeof XLSX === 'undefined') {
+    // Fallback: export as CSV
+    exportBatchCSV();
+    return;
+  }
+  const header = ['Qty','Brand','Model','CPU','RAM','Storage','Grade','Keyboard','Hist ERP (unit)','Range Min','Range Max','Match Level','Confidence %','Total ERP','Warnings'];
+  const rows = batchParsedGroups.map(a => {
+    const h = a.historical || {};
+    return [
+      a.quantity, a.brand, a.model, a.cpuModel || a.cpuTier,
+      a.ram || '', a.storage || '', a.grade, a.keyboard,
+      h.erp || '', h.priceRange?.min || '', h.priceRange?.max || '',
+      h.matchLevel || '', h.confidence || '',
+      h.erp ? h.erp * a.quantity : '', a.warnings.join('; ')
+    ];
+  });
+  // Totals row
+  const totQty = batchParsedGroups.reduce((s, a) => s + a.quantity, 0);
+  const totERP = batchParsedGroups.reduce((s, a) => s + ((a.historical?.erp || 0) * a.quantity), 0);
+  rows.push([totQty, '', '', '', '', '', '', '', '', '', '', '', '', totERP, 'TOTAAL']);
+
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'ERPIE Batch');
+  XLSX.writeFile(wb, `erpie-batch-${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 // ══════════════════════════════════════════════════════════════════════
