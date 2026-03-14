@@ -660,6 +660,13 @@ tbody tr:last-child { border-bottom: none; }
       </div>
     </div>
 
+    <!-- Button row -->
+    <div class="button-row">
+      <button class="btn btn-ghost" onclick="clearForm()" data-i18n="clearForm">Clear Form</button>
+      <button class="btn btn-ghost" onclick="showExample()" data-i18n="showExample">Show Example</button>
+      <button class="btn btn-ai" id="btn-ai-quote">🤖 <span data-i18n="getAiAnalysis">Get AI Analysis</span></button>
+    </div>
+
     <!-- Live Price Check Section -->
     <div class="form-section">
       <div class="form-section-title" data-i18n="livePriceCheck">🔍 Live Price Check</div>
@@ -692,13 +699,6 @@ tbody tr:last-child { border-bottom: none; }
         <button type="button" class="serial-btn" id="serial-microsoft" onclick="openMicrosoftSupport()">Microsoft</button>
         <button type="button" class="serial-btn" id="serial-asus" onclick="openAsusSupport()">Asus</button>
       </div>
-    </div>
-
-    <!-- Button row -->
-    <div class="button-row">
-      <button class="btn btn-ghost" onclick="clearForm()" data-i18n="clearForm">Clear Form</button>
-      <button class="btn btn-ghost" onclick="showExample()" data-i18n="showExample">Show Example</button>
-      <button class="btn btn-ai" id="btn-ai-quote">🤖 <span data-i18n="getAiAnalysis">Get AI Analysis</span></button>
     </div>
 
     <!-- AI Result card -->
@@ -817,8 +817,9 @@ tbody tr:last-child { border-bottom: none; }
 </div>
 
 <!-- Footer -->
-<div class="footer" data-i18n="footer">
-  ERPIE PriceFinder · Made by Incredible Projects / Henk Jekel
+<div class="footer">
+  <span data-i18n="footer">ERPIE PriceFinder · Made by Incredible Projects / Henk Jekel</span>
+  <span style="display:block;margin-top:4px;font-size:11px;opacity:0.6;">v1.3</span>
 </div>
 
 <!-- Help Modal -->
