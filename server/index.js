@@ -7,10 +7,14 @@ const path     = require('path');
 const { calculatePrice, analyzeDevices } = require('./pricing-engine');
 
 const app    = express();
+const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../client/public')));
+
+// Mount everything under /erpie so nginx proxy_pass /erpie/ → localhost:3001/erpie/ works
+router.use(express.static(path.join(__dirname, '../client/public')));
+app.use('/erpie', router);
 
 
 'use strict';
@@ -485,7 +489,7 @@ function parseExcel(buffer) {
 
 
 // ─── ROUTE 1: Single quote ───────────────────────────────────────────────────
-app.post('/api/quote', (req, res) => {
+router.post('/api/quote', (req, res) => {
   try {
     const result = calculatePrice(req.body);
     res.json({ ok: true, result });
@@ -494,8 +498,81 @@ app.post('/api/quote', (req, res) => {
   }
 });
 
+// ─── ROUTE 1b: AI-powered quote via openclaw ────────────────────────────────
+const { execFile } = require('child_process');
+const { promisify } = require('util');
+const execFileAsync = promisify(execFile);
+
+// Resolve openclaw binary: honour env var, else try PATH, else known locations
+const OPENCLAW_BIN = process.env.OPENCLAW_PATH || 'openclaw';
+
+router.post('/api/ai-quote', async (req, res) => {
+  try {
+    const { brand, model, cpu, ram, storage, condition } = req.body;
+    const specs = [brand, model, cpu, ram, storage, condition].filter(Boolean).join(', ');
+    console.log('[ai-quote] incoming specs:', specs);
+    if (!specs) return res.status(400).json({ ok: false, error: 'No device specs provided' });
+
+    const args = [
+      'agent', '--agent', 'main',
+      '-m', `Price this device: ${specs}`,
+      '--json'
+    ];
+    console.log('[ai-quote] executing:', OPENCLAW_BIN, args.join(' '));
+
+    const { stdout, stderr } = await execFileAsync(OPENCLAW_BIN, args, {
+      timeout: 60000,
+      env: { ...process.env, PATH: `${process.env.PATH}:/usr/local/bin:/opt/homebrew/bin` }
+    });
+
+    if (stderr) console.warn('[ai-quote] stderr:', stderr);
+    console.log('[ai-quote] raw stdout (%d chars):', stdout.length, stdout.slice(0, 500));
+
+    let parsed;
+    try {
+      parsed = JSON.parse(stdout);
+    } catch (parseErr) {
+      console.error('[ai-quote] JSON parse failed:', parseErr.message);
+      console.error('[ai-quote] stdout was:', stdout.slice(0, 1000));
+      return res.status(502).json({ ok: false, error: 'AI agent returned invalid JSON' });
+    }
+
+    console.log('[ai-quote] parsed keys:', Object.keys(parsed));
+    console.log('[ai-quote] result keys:', parsed.result ? Object.keys(parsed.result) : 'NO result key');
+    if (parsed.result?.payloads) {
+      console.log('[ai-quote] payloads count:', parsed.result.payloads.length);
+      console.log('[ai-quote] payloads[0]:', JSON.stringify(parsed.result.payloads[0]).slice(0, 300));
+    }
+
+    // Try multiple response shapes: result.payloads[0].text → result.text → result → raw
+    const text = parsed.result?.payloads?.[0]?.text
+              || parsed.result?.text
+              || (typeof parsed.result === 'string' ? parsed.result : null)
+              || parsed.text
+              || parsed.output;
+
+    if (!text) {
+      console.error('[ai-quote] could not extract text. Full response:', JSON.stringify(parsed).slice(0, 1000));
+      return res.status(502).json({ ok: false, error: 'No pricing result from AI agent', debug: Object.keys(parsed) });
+    }
+
+    console.log('[ai-quote] success, returning %d chars', text.length);
+    res.json({ ok: true, result: text });
+  } catch (err) {
+    console.error('[ai-quote] error:', err.code || err.message);
+    if (err.code === 'ENOENT') {
+      return res.status(503).json({
+        ok: false,
+        error: `openclaw binary not found at "${OPENCLAW_BIN}". Set OPENCLAW_PATH env var to the correct path.`
+      });
+    }
+    const status = err.killed ? 504 : 500;
+    res.status(status).json({ ok: false, error: err.message });
+  }
+});
+
 // ─── ROUTE 2: Batch file analysis ───────────────────────────────────────────
-app.post('/api/analyze', upload.single('file'), (req, res) => {
+router.post('/api/analyze', upload.single('file'), (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ ok: false, error: 'No file uploaded' });
     const region  = req.body.region || 'EU';
@@ -510,7 +587,7 @@ app.post('/api/analyze', upload.single('file'), (req, res) => {
 
 
 // ─── ROUTE 3: Text input analysis ────────────────────────────────────────────
-app.post('/api/analyze-text', (req, res) => {
+router.post('/api/analyze-text', (req, res) => {
   try {
     const { text = '', region = 'EU' } = req.body;
     if (!text.trim()) return res.status(400).json({ ok: false, error: 'No text provided' });
@@ -578,7 +655,7 @@ function parseTextInput(text) {
 }
 
 // ─── ROUTE 4: Generate HTML report ──────────────────────────────────────────
-app.post('/api/report', (req, res) => {
+router.post('/api/report', (req, res) => {
   try {
     const { devices = [], summary = {}, dealName = 'ERPIE Deal' } = req.body;
     const html = generateReport(devices, summary, dealName);
