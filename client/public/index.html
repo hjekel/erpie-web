@@ -489,7 +489,7 @@ tbody tr:last-child { border-bottom: none; }
   .help-content { padding: 20px; }
 }
 
-/* ── Batch Upload v2.4 ─────────────────────────────────────── */
+/* ── Batch Upload v2.5 ─────────────────────────────────────── */
 .batch-textarea {
   width: 100%;
   min-height: 160px;
@@ -1136,7 +1136,7 @@ tbody tr:last-child { border-bottom: none; }
     <div class="logo"><span class="logo-lobster">🦞</span><span class="logo-erp">ERP</span>IE PriceFinder</div>
     <span class="logo-by" data-i18n="madeBy">by</span>
     <span class="logo-planbit">Incredible Projects</span>
-    <div class="badge">v2.4</div>
+    <div class="badge">v2.5</div>
   </div>
   <div class="header-right">
     <div class="lang-switch">
@@ -1671,7 +1671,7 @@ Voorbeelden:
 <!-- Footer -->
 <div class="footer">
   <span data-i18n="footer">ERPIE PriceFinder · Made by Incredible Projects / Henk Jekel</span>
-  <span style="display:block;margin-top:4px;font-size:11px;opacity:0.6;">v2.4</span>
+  <span style="display:block;margin-top:4px;font-size:11px;opacity:0.6;">v2.5</span>
 </div>
 
 <!-- Help Modal -->
@@ -1704,6 +1704,7 @@ Voorbeelden:
     <p>Enter a serial number to check warranty status and device specs on the manufacturer's support site.</p>
     <h3>Version History</h3>
     <ul class="version-history">
+      <li><strong>v2.5</strong> — ARS Auto-Training Parser: auto-extract quoted prices from PlanBit ARS files, ERPIE vs PlanBit comparison</li>
       <li><strong>v2.4</strong> — Universal Format Parser: multi-sheet Excel, PDF, email forwards, graceful degradation</li>
       <li><strong>v2.3</strong> — Zelfstudie tab (SCHOLAR reports browser), BVA → Troostwijk Auctions</li>
       <li><strong>v2.2</strong> — PTOLEMEUS Knowledge Base: browser, search, Q&A, source management</li>
@@ -2293,7 +2294,7 @@ function esc(str) {
 }
 
 // ══════════════════════════════════════════════════════════════════════
-// BATCH UPLOAD v2.4 — Universal Parser + Historical + Live Validation
+// BATCH UPLOAD v2.5 — Universal Parser + Historical + Live Validation
 // ══════════════════════════════════════════════════════════════════════
 
 // ── Pattern definitions ──────────────────────────────────────────
@@ -2458,7 +2459,7 @@ async function handleBatchFile(file) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// UNIVERSAL FORMAT PARSER v2.4
+// UNIVERSAL FORMAT PARSER v2.5
 // Handles: Excel (multi-sheet), CSV, PDF, Email, Plain Text
 // ══════════════════════════════════════════════════════════════════
 
@@ -4026,6 +4027,26 @@ trainingDropzone.addEventListener('drop', e => {
 });
 
 async function handleTrainingFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  // Try ARS detection for Excel files
+  if (ext === 'xlsx' || ext === 'xls') {
+    if (typeof XLSX === 'undefined') {
+      document.getElementById('training-input').value = '# Excel support requires SheetJS';
+      return;
+    }
+    const data = await file.arrayBuffer();
+    const wb = XLSX.read(data, { type: 'array' });
+    const arsResult = parseARSWorkbook(wb, file.name);
+
+    if (arsResult.isARS) {
+      // ARS file detected! Auto-fill everything
+      applyARSToTrainingForm(arsResult);
+      return;
+    }
+  }
+
+  // Fallback: regular universal parser
   const result = await universalFileParser(file);
   let text = result.text;
   if (result.sheets > 1) text = `# Parsed ${result.sheets} sheets from ${file.name}\n` + text;
@@ -4034,6 +4055,340 @@ async function handleTrainingFile(file) {
   if (!document.getElementById('training-dealname').value) {
     document.getElementById('training-dealname').value = file.name.replace(/\.[^/.]+$/, '');
   }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ARS AUTO-TRAINING PARSER v1.0
+// Detects PlanBit ARS files and extracts assets WITH quoted prices
+// ══════════════════════════════════════════════════════════════════
+
+function parseARSWorkbook(wb, filename) {
+  const sheetNames = wb.SheetNames.map(s => s.toLowerCase());
+
+  // ARS detection: has "Quote Request" sheet or inventory-like sheet with PlanBit columns
+  const quoteSheetIdx = wb.SheetNames.findIndex(s =>
+    /quote\s*request/i.test(s));
+  const invSheetIdx = wb.SheetNames.findIndex(s =>
+    /customer\s*inventory|inventory.*detail|deviceli/i.test(s));
+
+  // Also check: single-sheet files that have PlanBit column structure
+  let inventorySheet = null;
+  if (invSheetIdx >= 0) {
+    inventorySheet = wb.SheetNames[invSheetIdx];
+  } else if (wb.SheetNames.length === 1) {
+    // Single sheet — check if it has ARS columns
+    inventorySheet = wb.SheetNames[0];
+  } else if (wb.SheetNames.length > 1 && quoteSheetIdx < 0) {
+    // No "Quote Request" — not ARS
+    return { isARS: false };
+  } else {
+    // Has Quote Request but no named inventory — try second sheet or first non-quote sheet
+    inventorySheet = wb.SheetNames.find((s, i) => i !== quoteSheetIdx) || wb.SheetNames[0];
+  }
+
+  // Read inventory sheet
+  const invData = XLSX.utils.sheet_to_json(wb.Sheets[inventorySheet], { header: 1 });
+  if (invData.length < 3) return { isARS: false };
+
+  // Detect ARS column structure by scanning first 6 rows for key headers
+  const colMap = detectARSColumns(invData);
+  if (!colMap.product && !colMap.brand && !colMap.model) return { isARS: false };
+  if (!colMap.salesPrice && !colMap.qty) return { isARS: false };
+
+  // It's an ARS file!
+  const metadata = quoteSheetIdx >= 0
+    ? extractQuoteMetadata(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[quoteSheetIdx]], { header: 1 }))
+    : {};
+
+  // Infer customer from filename if not found
+  if (!metadata.customer) {
+    metadata.customer = inferCustomerFromFilename(filename);
+  }
+
+  // Extract assets with prices
+  const assets = extractARSAssets(invData, colMap);
+
+  // Calculate total
+  const totalQuote = assets.reduce((s, a) => s + (a.totalValue || 0), 0);
+  const totalQty = assets.reduce((s, a) => s + a.quantity, 0);
+
+  return {
+    isARS: true,
+    metadata: {
+      customer: metadata.customer || 'Onbekend',
+      date: metadata.date || '',
+      totalQuote: metadata.totalQuote || totalQuote,
+      netReturn: metadata.netReturn || null,
+      serviceCost: metadata.serviceCost || null,
+      filename: filename,
+    },
+    assets,
+    totalQty,
+    totalQuote: totalQuote,
+    sheetName: inventorySheet,
+  };
+}
+
+function detectARSColumns(data) {
+  const colMap = { product: null, brand: null, model: null, processor: null, remarks: null, qty: null, salesPrice: null, sum: null, location: null };
+  // Scan rows 0-5 for header keywords (ARS uses row 3-4 typically, 0-indexed)
+  for (let r = 0; r < Math.min(6, data.length); r++) {
+    if (!data[r]) continue;
+    for (let c = 0; c < data[r].length; c++) {
+      const v = String(data[r][c] || '').toLowerCase().trim();
+      if (v === 'product' || v === 'configuration') colMap.product = c;
+      else if (v === 'brand') colMap.brand = c;
+      else if (v === 'model') colMap.model = c;
+      else if (/^processor|^assumed spec/i.test(v)) colMap.processor = c;
+      else if (/^remarks?$|^location$/i.test(v)) colMap.remarks = c;
+      else if (/^(qty|units|quantity)$/i.test(v)) colMap.qty = c;
+      else if (/sales\s*price|^indication|sales\s*indication/i.test(v)) colMap.salesPrice = c;
+      else if (/^sum$/i.test(v)) colMap.sum = c;
+      else if (/^location$/i.test(v)) colMap.location = c;
+    }
+  }
+  // Find header end row (last row with header keywords)
+  colMap._dataStartRow = 0;
+  for (let r = 0; r < Math.min(6, data.length); r++) {
+    if (!data[r]) continue;
+    const rowText = data[r].map(c => String(c || '')).join(' ').toLowerCase();
+    if (/product|brand|model|processor|units|sales/i.test(rowText)) {
+      colMap._dataStartRow = r + 1;
+    }
+  }
+  return colMap;
+}
+
+function extractQuoteMetadata(data) {
+  const meta = {};
+  for (const row of data) {
+    if (!row || !row[0]) continue;
+    const cell = String(row[0]).toLowerCase().trim();
+    if (cell.includes('customer') && row[1]) {
+      meta.customer = String(row[1]).replace(/^zones\s*-\s*/i, '').trim();
+    }
+    if ((cell.includes('client name') || cell.includes('client reference')) && row[1]) {
+      // Prefer client name over customer field
+      meta.customer = String(row[1]).split('-')[0].trim().replace(/^zones\s*-\s*/i, '');
+    }
+    if (cell.includes('date') && row[1]) {
+      const d = row[1];
+      if (d instanceof Date || (typeof d === 'object' && d)) {
+        try { meta.date = new Date(d).toISOString().slice(0, 10); } catch(e) {}
+      } else {
+        // Parse text dates like "March 5th 2026"
+        const txt = String(d);
+        const m = txt.match(/(\w+)\s+(\d+)\w*\s+(\d{4})/);
+        if (m) {
+          const months = { january:0, february:1, march:2, april:3, may:4, june:5, july:6, august:7, september:8, october:9, november:10, december:11 };
+          const mo = months[m[1].toLowerCase()];
+          if (mo !== undefined) meta.date = `${m[3]}-${String(mo+1).padStart(2,'0')}-${m[2].padStart(2,'0')}`;
+        }
+      }
+    }
+    if (cell.includes('estimated sales price') || cell.includes('estimated sales')) {
+      meta.totalQuote = parseFloat(row[3]) || parseFloat(row[2]) || parseFloat(row[1]) || 0;
+    }
+    if (cell.includes('estimated nett return') || cell.includes('nett return')) {
+      meta.netReturn = parseFloat(row[3]) || parseFloat(row[2]) || 0;
+    }
+    if (cell.includes('total') && !cell.includes('estimated') && !cell.includes('nett')) {
+      meta.serviceCost = parseFloat(row[3]) || 0;
+    }
+  }
+  return meta;
+}
+
+function extractARSAssets(data, colMap) {
+  const assets = [];
+  const validTypes = ['notebook', 'desktop', 'server', 'monitor', 'tablet', 'all-in-one', 'workstation'];
+  const startRow = colMap._dataStartRow || 4;
+
+  for (let i = startRow; i < data.length; i++) {
+    const row = data[i];
+    if (!row) continue;
+
+    // Check product type
+    const productType = String(row[colMap.product] || '').trim().toUpperCase();
+    if (!productType) continue;
+    if (!validTypes.some(t => productType.toLowerCase().includes(t))) {
+      // Check if it's a total row
+      if (/total|totaal/i.test(productType)) continue;
+      // Skip empty/unknown types
+      continue;
+    }
+
+    const brand = String(row[colMap.brand] || '').trim();
+    const model = String(row[colMap.model] || '').trim();
+    const processor = colMap.processor !== null ? String(row[colMap.processor] || '').trim() : '';
+    const remarks = colMap.remarks !== null ? String(row[colMap.remarks] || '').trim() : '';
+    const qty = parseInt(row[colMap.qty]) || 0;
+    const pricePerUnit = colMap.salesPrice !== null ? (parseFloat(row[colMap.salesPrice]) || 0) : 0;
+    const totalValue = colMap.sum !== null ? (parseFloat(row[colMap.sum]) || 0) : (qty * pricePerUnit);
+    const location = colMap.location !== null ? String(row[colMap.location] || '').trim() : '';
+
+    if (qty === 0 && pricePerUnit === 0) continue; // Skip fully empty rows
+
+    // Parse processor string
+    const specs = parseARSProcessorString(processor);
+
+    assets.push({
+      type: productType,
+      brand: brand,
+      model: model.replace(/^\s*HP\s+HP\s+/i, 'HP '), // Clean double "HP HP" prefix
+      processor: processor,
+      cpu: specs.cpu,
+      ram: specs.ram,
+      storage: specs.storage,
+      keyboard: specs.keyboard,
+      screenSize: specs.screenSize,
+      quantity: qty,
+      quotedPricePerUnit: pricePerUnit,
+      totalValue: totalValue,
+      remarks: remarks,
+      location: location,
+      isAssumed: /ASSUMED/i.test(remarks) || /ASSUMED/i.test(processor),
+      hasPrice: pricePerUnit > 0,
+    });
+  }
+
+  return assets;
+}
+
+function parseARSProcessorString(proc) {
+  // Examples from real ARS files:
+  // "13-inch Core i7-85xxU - SSD 512GB - 16GB QWERTY - English"
+  // "14-Inch Core i5-6300U 2.40GHz - 180GB - 8GB QWERTY - English"
+  // "Core™ i9-9900T/16GB/512MB"
+  // "Core™ i7-1260P /16GB/1TB/14" WQUXGA/US"
+  // "Intel® Celeron® N5105 (4 MB 2,90 GHz)/16GB/64GB"
+
+  const result = { cpu: '', ram: '', storage: '', keyboard: '', screenSize: '' };
+
+  // Screen size
+  const screenM = proc.match(/(\d{2}(?:\.\d)?)[""]\s*-?\s*inch|(\d{2}(?:\.\d)?)-inch/i);
+  if (screenM) result.screenSize = (screenM[1] || screenM[2]) + '"';
+
+  // CPU
+  const cpuM = proc.match(/i[3579]-\d{4,5}[A-Z]?|i9-\d{4}[A-Z]?|Celeron[® ]*N?\d{4}|Xeon[® ]*[EWA]-?\d{4}|Core[™ ]*i\d-\d{4,5}[A-Z]?|M[1234]\s*(Pro|Max|Ultra)?/i);
+  if (cpuM) {
+    result.cpu = cpuM[0].replace(/[™®]/g, '').trim();
+  }
+
+  // RAM — look for standalone GB values that are RAM-sized (4, 8, 16, 32, 64, 128)
+  const ramCandidates = [...proc.matchAll(/(\d+)\s*GB/gi)];
+  for (const m of ramCandidates) {
+    const val = parseInt(m[1]);
+    if ([4, 8, 16, 32, 64, 128].includes(val)) {
+      result.ram = val + 'GB';
+      break;
+    }
+  }
+
+  // Storage — look for SSD/HDD mentions or large GB values
+  const storageM = proc.match(/(?:SSD\s*)?(\d+)\s*(GB|TB)\s*(?:SSD|HDD)?/i);
+  if (storageM) {
+    const val = parseInt(storageM[1]);
+    const unit = storageM[2].toUpperCase();
+    if (unit === 'TB' || val >= 128) {
+      result.storage = val + unit + (proc.match(/SSD/i) ? ' SSD' : '');
+    }
+  }
+  // Fallback: slash-separated format like /16GB/512MB or /16GB/1TB
+  if (!result.storage) {
+    const slashM = proc.match(/\/(\d+)\s*(GB|TB|MB)/gi);
+    if (slashM && slashM.length >= 2) {
+      // Second slash value is usually storage
+      const s = slashM[1].replace('/', '');
+      result.storage = s;
+    }
+  }
+
+  // Keyboard
+  if (/QWERTY/i.test(proc)) {
+    result.keyboard = 'QWERTY';
+    if (/english|UK|US|EN/i.test(proc)) result.keyboard += ' EN';
+    else if (/german|DE|GER/i.test(proc)) result.keyboard += ' DE';
+    else if (/dutch|NL/i.test(proc)) result.keyboard += ' NL';
+  }
+
+  return result;
+}
+
+function inferCustomerFromFilename(filename) {
+  // "ARS Quotation Zones - Freshfields Dusseldorf (GER) all 4 RITM.xlsx"
+  // "1957 Freshfields London.xlsx"
+  // "ARS Quotation Zones -  Tencent International Services (NL).xlsx"
+  let name = filename.replace(/\.xlsx?$/i, '');
+  name = name.replace(/^ARS\s*Quotation\s*Zones?\s*-?\s*/i, '');
+  name = name.replace(/^\d+\s*-?\s*/, '');
+  name = name.replace(/\s*all\s*\d+\s*RITM.*$/i, '');
+  name = name.replace(/\s*asset\s*verification.*$/i, '');
+  name = name.replace(/\s*\d{6}$/i, ''); // trailing date like 030226
+  name = name.replace(/\s*\([A-Z]{2,}\)\s*/g, ' '); // (GER), (NL)
+  return name.trim();
+}
+
+// ── Apply ARS data to Training form ─────────────────────────────
+function applyARSToTrainingForm(arsResult) {
+  const meta = arsResult.metadata;
+  const assets = arsResult.assets;
+
+  // Auto-fill form fields
+  document.getElementById('training-customer').value = meta.customer;
+  document.getElementById('training-dealname').value = meta.customer;
+  if (meta.date) document.getElementById('training-date').value = meta.date;
+  document.querySelector('input[name="training-status"][value="won"]').checked = true;
+  document.getElementById('training-actual-total').value = meta.totalQuote || '';
+  document.getElementById('training-notes').value = `ARS import: ${meta.filename} · ${arsResult.totalQty} units · €${(meta.totalQuote || 0).toLocaleString('nl-NL')}`;
+
+  // Build text lines from assets for the textarea (for display)
+  const lines = assets.map(a =>
+    `${a.quantity}x ${a.brand} ${a.model} ${a.cpu || ''} ${a.ram || ''} ${a.storage || ''} ${a.keyboard || ''}`.replace(/\s+/g, ' ').trim()
+  );
+  document.getElementById('training-input').value = `# ARS Auto-Import: ${meta.customer}\n# ${arsResult.totalQty} units · €${(meta.totalQuote || 0).toLocaleString('nl-NL')}\n\n` + lines.join('\n');
+
+  // Store ARS data for processTraining to use
+  window._arsImportData = arsResult;
+
+  // Show notification
+  showARSNotification(arsResult);
+}
+
+function showARSNotification(arsResult) {
+  const meta = arsResult.metadata;
+  const assets = arsResult.assets;
+  const withPrice = assets.filter(a => a.hasPrice).length;
+  const withoutPrice = assets.filter(a => !a.hasPrice).length;
+
+  // Create notification element
+  let notif = document.getElementById('ars-notification');
+  if (!notif) {
+    notif = document.createElement('div');
+    notif.id = 'ars-notification';
+    notif.style.cssText = 'background:linear-gradient(135deg,#22c55e15,#22c55e05);border:1px solid #22c55e40;border-radius:12px;padding:16px;margin:12px 0;';
+    const trainingInput = document.getElementById('training-input');
+    trainingInput.parentElement.insertBefore(notif, trainingInput);
+  }
+
+  notif.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <span style="font-size:20px;">✅</span>
+      <strong style="color:#22c55e;">ARS File Gedetecteerd!</strong>
+    </div>
+    <div style="font-size:13px;line-height:1.8;">
+      <div><strong>Klant:</strong> ${esc(meta.customer)}</div>
+      <div><strong>Datum:</strong> ${meta.date || 'Onbekend'}</div>
+      <div><strong>Assets:</strong> ${assets.length} types, ${arsResult.totalQty} stuks</div>
+      <div><strong>Totaal Quote:</strong> €${(meta.totalQuote || 0).toLocaleString('nl-NL')}</div>
+      <div><strong>Met prijs:</strong> ${withPrice} types ${withoutPrice > 0 ? `· <span style="color:#f59e0b;">⚠️ ${withoutPrice} zonder prijs</span>` : ''}</div>
+      ${meta.netReturn ? `<div><strong>Netto Opbrengst:</strong> €${meta.netReturn.toLocaleString('nl-NL')}</div>` : ''}
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);">
+      Formulier is automatisch ingevuld. Klik <strong>"Parse & Analyseer"</strong> om ERPIE's prijzen te vergelijken.
+    </div>
+  `;
+  notif.style.display = 'block';
 }
 
 // ── Example ─────────────────────────────────────────────────────
@@ -4070,29 +4425,67 @@ async function processTraining() {
   const rawInput = document.getElementById('training-input').value.trim();
   if (!rawInput) { alert('Voer eerst asset data in of laad een voorbeeld.'); return; }
 
-  const cleanedInput = parseInputText(rawInput);
-  const lines = cleanedInput.split('\n').filter(l => l.trim());
   trainingAssets = [];
   const cardsContainer = document.getElementById('training-cards');
   cardsContainer.innerHTML = '';
   document.getElementById('training-results').style.display = 'block';
   document.getElementById('training-summary').style.display = 'none';
 
-  for (let i = 0; i < lines.length; i++) {
-    const asset = parseLine(lines[i]); // Reuse batch parser!
-    if (!asset) continue;
-    asset.index = trainingAssets.length;
+  // Check if we have ARS import data
+  const arsData = window._arsImportData;
+  if (arsData && arsData.isARS) {
+    // ARS mode: use pre-parsed assets with quoted prices
+    for (let i = 0; i < arsData.assets.length; i++) {
+      const arsAsset = arsData.assets[i];
+      // Build a text line for parseLine
+      const textLine = `${arsAsset.quantity}x ${arsAsset.brand} ${arsAsset.model} ${arsAsset.cpu || ''} ${arsAsset.ram || ''} ${arsAsset.storage || ''}`;
+      let asset = parseLine(textLine);
+      if (!asset) {
+        // Fallback: create minimal asset
+        asset = {
+          rawInput: textLine, quantity: arsAsset.quantity, brand: arsAsset.brand, model: arsAsset.model,
+          cpuModel: arsAsset.cpu, cpuTier: '', cpuVendor: '', cpuGen: null, cpuYear: null, cpuInferred: false,
+          modelFamily: '', ram: parseInt(arsAsset.ram) || null, storage: parseInt(arsAsset.storage) || null,
+          grade: '', keyboard: arsAsset.keyboard || '', keyboardWarning: null, warnings: [], confidence: 30,
+        };
+      }
+      asset.index = trainingAssets.length;
+      asset.arsData = arsAsset; // Keep ARS data reference
 
-    // Historical pricing (reuse)
-    const hist = findHistoricalMatches(asset);
-    asset.historical = calculateHistoricalERP(hist);
-    asset.feedback = null;
-    asset.actualPrice = null;
-    asset.suggestedPrice = null;
+      // Historical pricing
+      const hist = findHistoricalMatches(asset);
+      asset.historical = calculateHistoricalERP(hist);
+      asset.feedback = null;
+      // Auto-fill actual price from ARS quoted price!
+      asset.actualPrice = arsAsset.quotedPricePerUnit || null;
+      asset.suggestedPrice = null;
 
-    trainingAssets.push(asset);
-    renderTrainingCard(asset, cardsContainer);
-    await new Promise(r => setTimeout(r, 60));
+      trainingAssets.push(asset);
+      renderTrainingCard(asset, cardsContainer);
+      await new Promise(r => setTimeout(r, 60));
+    }
+    // Clear ARS data to prevent re-use
+    window._arsImportData = null;
+  } else {
+    // Normal mode: parse text lines
+    const cleanedInput = parseInputText(rawInput);
+    const lines = cleanedInput.split('\n').filter(l => l.trim());
+
+    for (let i = 0; i < lines.length; i++) {
+      const asset = parseLine(lines[i]);
+      if (!asset) continue;
+      asset.index = trainingAssets.length;
+
+      const hist = findHistoricalMatches(asset);
+      asset.historical = calculateHistoricalERP(hist);
+      asset.feedback = null;
+      asset.actualPrice = null;
+      asset.suggestedPrice = null;
+
+      trainingAssets.push(asset);
+      renderTrainingCard(asset, cardsContainer);
+      await new Promise(r => setTimeout(r, 60));
+    }
   }
 
   updateTrainingSummary();
@@ -4117,13 +4510,31 @@ function renderTrainingCard(asset, container) {
   card.className = 'training-card';
   card.id = `training-card-${idx}`;
 
+  // ARS-specific data
+  const ars = asset.arsData || null;
+  const quotedPrice = ars ? ars.quotedPricePerUnit : null;
+  const quotedTotal = quotedPrice ? quotedPrice * asset.quantity : null;
+
+  // Auto-calculate delta between ERPIE and quoted price
+  let autoCompare = '';
+  if (unitERP && quotedPrice) {
+    const diff = quotedPrice - unitERP;
+    const pct = ((diff / unitERP) * 100).toFixed(1);
+    const cls = diff > 0 ? 'positive' : (diff < 0 ? 'negative' : 'neutral');
+    autoCompare = `<div class="training-delta ${cls}" style="display:block;">
+      Delta ERPIE vs PlanBit: ${diff >= 0 ? '+' : ''}€${diff} (${diff >= 0 ? '+' : ''}${pct}%) per stuk
+    </div>`;
+  }
+
   card.innerHTML = `
     <div class="training-card-header">
       <span class="training-card-qty">${asset.quantity}×</span>
       <span class="training-card-model">${esc(asset.brand)} ${esc(asset.model || '?')}</span>
+      ${ars && ars.isAssumed ? '<span style="font-size:10px;background:#f59e0b20;color:#f59e0b;padding:2px 6px;border-radius:4px;">ASSUMED</span>' : ''}
       <span class="training-card-status">${h.erp ? '✅' : '⚠️'}</span>
     </div>
     <div class="training-card-specs">${esc(specsStr) || '—'}</div>
+    ${ars && ars.location ? `<div style="font-size:11px;color:var(--muted);">📍 ${esc(ars.location)}</div>` : ''}
     ${asset.warnings.length > 0 ? `<div class="training-card-warnings">${asset.warnings.map(w => '⚠️ ' + esc(w)).join('<br>')}</div>` : ''}
     <div class="training-card-pricing">
       <div class="training-price-row">
@@ -4131,17 +4542,26 @@ function renderTrainingCard(asset, container) {
         <span class="training-price-value">${unitERP ? '€' + unitERP : 'Geen data'}</span>
         ${h.matchLevel ? `<span class="match-badge match-${h.matchLevel}" style="margin-left:8px;">${h.matchLevel}</span>` : ''}
       </div>
-      ${unitERP ? `<div class="training-price-row training-price-total">
+      ${quotedPrice !== null ? `<div class="training-price-row" style="margin-top:4px;">
+        <span class="training-price-label" style="color:#7c3aed;">PlanBit Quote:</span>
+        <span class="training-price-value" style="color:#7c3aed;font-weight:700;">€${quotedPrice}</span>
+      </div>` : ''}
+      ${quotedTotal ? `<div class="training-price-row training-price-total">
+        <span class="training-price-label">Totaal (${asset.quantity}×):</span>
+        <span class="training-price-value">€${quotedTotal.toLocaleString('nl-NL')}</span>
+      </div>` : (unitERP ? `<div class="training-price-row training-price-total">
         <span class="training-price-label">Totaal (${asset.quantity}×):</span>
         <span class="training-price-value">€${totalERP.toLocaleString('nl-NL')}</span>
-      </div>` : ''}
+      </div>` : '')}
     </div>
+    ${autoCompare}
     <div class="training-actual-row">
       <span class="training-price-label">Werkelijk:</span>
       <span style="color:var(--muted)">€</span>
       <input type="number" id="training-actual-${idx}" placeholder="?" min="0" step="1"
+             ${quotedPrice ? `value="${quotedPrice}"` : ''}
              onchange="updateTrainingActual(${idx}, this.value)">
-      <span style="font-size:12px;color:var(--muted)">per stuk</span>
+      <span style="font-size:12px;color:var(--muted)">per stuk ${quotedPrice ? '(auto-filled)' : ''}</span>
     </div>
     <div class="training-delta" id="training-delta-${idx}" style="display:none;"></div>
     <div class="training-feedback-row">
