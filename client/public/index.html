@@ -193,12 +193,28 @@ input, select, button { font-family: inherit; }
 .btn-primary:hover { background: var(--accent2); }
 .btn-ai { background: #7c3aed; color: #fff; }
 .btn-ai:hover { background: #6d28d9; }
+.btn-ai-green { background: #15803d; color: #fff; padding: 12px 28px; font-size: 15px; margin-left: auto; }
+.btn-ai-green:hover { background: #166534; }
 .btn-ghost {
   background: transparent;
   color: var(--muted);
   border: 1px solid var(--border);
 }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-clear { background: var(--surface2); color: var(--text); border: 1px solid var(--border); opacity: .85; }
+.btn-clear:hover { opacity: 1; border-color: var(--accent); }
+.btn-brand {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-brand:hover { border-color: var(--accent); background: var(--surface2); }
+.btn-brand img { height: 16px; width: 16px; object-fit: contain; }
 .btn-sm { padding: 7px 14px; font-size: 13px; }
 
 /* ── Batch upload ────────────────────────────────────────────────── */
@@ -381,6 +397,7 @@ tbody tr:last-child { border-bottom: none; }
   cursor: pointer;
   transition: all 0.15s ease;
 }
+.search-btn img { height: 16px; width: 16px; object-fit: contain; }
 .search-btn:hover { border-color: var(--accent); }
 .search-btn.b2b { border-color: #22c55e40; background: #22c55e10; }
 .search-btn.b2b:hover { border-color: #22c55e; background: #22c55e20; }
@@ -1347,14 +1364,20 @@ tbody tr:last-child { border-bottom: none; }
     </div>
 
     <!-- Button row -->
-    <div style="font-size:11px;color:var(--muted);margin-bottom:4px;letter-spacing:.03em;" data-i18n="exampleAssets">VOORBEELD ASSETS</div>
-    <div class="button-row">
-      <button class="btn btn-ghost" onclick="clearForm()" data-i18n="clearForm">Clear Form</button>
-      <button class="btn btn-ghost" onclick="showExampleDell()" title="Dell Latitude 5530 i5-1245U 16GB 256GB"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Dell_Logo.svg/16px-Dell_Logo.svg.png" alt="" style="height:13px;vertical-align:-1px;margin-right:3px;filter:var(--logo-filter,none)">Dell</button>
-      <button class="btn btn-ghost" onclick="showExampleHP()" title="HP EliteBook 840 G9 i5-1245U 16GB 512GB"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/HP_logo_2012.svg/16px-HP_logo_2012.svg.png" alt="" style="height:14px;vertical-align:-2px;margin-right:3px;filter:var(--logo-filter,none)">HP</button>
-      <button class="btn btn-ghost" onclick="showExampleLenovo()" title="Lenovo ThinkPad T14 Gen 3 i5-1245U 16GB 256GB"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Lenovo_logo_2015.svg/16px-Lenovo_logo_2015.svg.png" alt="" style="height:11px;vertical-align:0px;margin-right:3px;filter:var(--logo-filter,none)">Lenovo</button>
-      <button class="btn btn-ghost" onclick="showExampleApple()" title="MacBook Pro 14&quot; M1 Pro 16GB 512GB"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/14px-Apple_logo_black.svg.png" alt="" style="height:14px;vertical-align:-2px;margin-right:3px;filter:var(--logo-filter,none)">Apple</button>
-      <button class="btn btn-ai" id="btn-ai-quote">🤖 <span data-i18n="getAiAnalysis">Get AI Analysis</span></button>
+    <div class="button-row" style="align-items:center;">
+      <button class="btn btn-clear" onclick="clearForm()" data-i18n="clearForm">Formulier Wissen</button>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;" data-i18n="exampleAssets">VOORBEELD ASSETS</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-brand" onclick="showExampleDell()" title="Dell Latitude 5xxx i5-1245U 16GB 256GB Grade B"><img src="https://www.google.com/s2/favicons?domain=dell.com&sz=32" alt="">Dell</button>
+          <button class="btn btn-brand" onclick="showExampleHP()" title="HP EliteBook 8xx i5-1245U 16GB 512GB Grade A"><img src="https://www.google.com/s2/favicons?domain=hp.com&sz=32" alt="">HP</button>
+          <button class="btn btn-brand" onclick="showExampleLenovo()" title="Lenovo ThinkPad T i5-1245U 16GB 256GB Grade B"><img src="https://www.google.com/s2/favicons?domain=lenovo.com&sz=32" alt="">Lenovo</button>
+          <button class="btn btn-brand" onclick="showExampleApple()" title="MacBook Pro 14&quot; M1 Pro 16GB 512GB Grade A"><img src="https://www.google.com/s2/favicons?domain=apple.com&sz=32" alt="">Apple</button>
+          <button class="btn btn-brand" onclick="showExampleMicrosoft()" title="Surface Pro i5-1245U 16GB 256GB Grade A"><img src="https://www.google.com/s2/favicons?domain=microsoft.com&sz=32" alt="">Microsoft</button>
+          <button class="btn btn-brand" onclick="showExampleAsus()" title="Asus ExpertBook i5-1245U 16GB 512GB Grade B"><img src="https://www.google.com/s2/favicons?domain=asus.com&sz=32" alt="">Asus</button>
+        </div>
+      </div>
+      <button class="btn btn-ai-green" id="btn-ai-quote">🤖 <span data-i18n="getAiAnalysis">AI Analyse</span></button>
     </div>
 
     <!-- Live Price Check Section -->
@@ -1362,17 +1385,17 @@ tbody tr:last-child { border-bottom: none; }
       <div class="form-section-title" data-i18n="livePriceCheck">🔍 Live Price Check</div>
       <div class="button-row-label" data-i18n="generalB2B">General & B2B Marketplaces</div>
       <div class="search-buttons">
-        <button type="button" class="search-btn" onclick="openGoogleSearch()">🔎 Google</button>
-        <button type="button" class="search-btn b2b" onclick="openITGigant()">🏢 IT Gigant</button>
-        <button type="button" class="search-btn b2b" onclick="openTroostwijk()">🔨 Troostwijk</button>
-        <button type="button" class="search-btn b2b" onclick="openBrokerSite()">🌐 The Broker Site</button>
+        <button type="button" class="search-btn" onclick="openGoogleSearch()"><img src="https://www.google.com/s2/favicons?domain=google.com&sz=32" alt=""> Google</button>
+        <button type="button" class="search-btn b2b" onclick="openITGigant()"><img src="https://www.google.com/s2/favicons?domain=itgigant.nl&sz=32" alt=""> IT Gigant</button>
+        <button type="button" class="search-btn b2b" onclick="openTroostwijk()"><img src="https://www.google.com/s2/favicons?domain=troostwijkauctions.com&sz=32" alt=""> Troostwijk</button>
+        <button type="button" class="search-btn b2b" onclick="openBrokerSite()"><img src="https://www.google.com/s2/favicons?domain=thebrokersite.com&sz=32" alt=""> The Broker Site</button>
       </div>
       <div class="button-row-label" data-i18n="b2cReference">B2C Reference Prices</div>
       <div class="search-buttons">
-        <button type="button" class="search-btn b2c" onclick="openBackMarket()">📦 Back Market</button>
-        <button type="button" class="search-btn b2c" onclick="openRefurbed()">♻️ Refurbed</button>
-        <button type="button" class="search-btn b2c" onclick="openAmazonRenewed()">🛒 Amazon Renewed</button>
-        <button type="button" class="search-btn apple" onclick="openRefurbMe()">🍎 RefurbMe</button>
+        <button type="button" class="search-btn b2c" onclick="openBackMarket()"><img src="https://www.google.com/s2/favicons?domain=backmarket.nl&sz=32" alt=""> Back Market</button>
+        <button type="button" class="search-btn b2c" onclick="openRefurbed()"><img src="https://www.google.com/s2/favicons?domain=refurbed.nl&sz=32" alt=""> Refurbed</button>
+        <button type="button" class="search-btn b2c" onclick="openAmazonRenewed()"><img src="https://www.google.com/s2/favicons?domain=amazon.nl&sz=32" alt=""> Amazon Renewed</button>
+        <button type="button" class="search-btn apple" onclick="openRefurbMe()"><img src="https://www.google.com/s2/favicons?domain=refurb.me&sz=32" alt=""> RefurbMe</button>
       </div>
     </div>
 
@@ -2256,6 +2279,14 @@ function showExampleLenovo() {
 function showExampleApple() {
   fillExample({ brand: 'apple', model: 'macbook-pro-14', cpuFamily: 'm1', cpuGen: 'pro',
     cpuModel: '', ram: '16', ssd: '512', grade: 'A', quantity: '10' });
+}
+function showExampleMicrosoft() {
+  fillExample({ brand: 'microsoft', model: 'surface-pro', cpuFamily: 'i5', cpuGen: '12',
+    cpuModel: 'i5-1245U', ram: '16', ssd: '256', grade: 'A', quantity: '15' });
+}
+function showExampleAsus() {
+  fillExample({ brand: 'asus', model: 'expertbook', cpuFamily: 'i5', cpuGen: '12',
+    cpuModel: 'i5-1245U', ram: '16', ssd: '512', grade: 'B', quantity: '20' });
 }
 
 // ── The Broker Site search ──────────────────────────────────────
