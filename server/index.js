@@ -17,8 +17,6 @@ router.use(express.static(path.join(__dirname, '../client/public')));
 app.use('/erpie', router);
 
 
-'use strict';
-
 // ═══════════════════════════════════════════════════════════════════════════
 // UNIVERSAL DEVICE PARSER v2.0
 // Handles: ARS Excel, PWC/Vendor Quote, Frankfurt CSV, Email text, Free text
@@ -623,58 +621,6 @@ router.post('/api/analyze-text', (req, res) => {
     res.status(500).json({ ok: false, error: err.message });
   }
 });
-
-// ─── TEXT INPUT PARSER ────────────────────────────────────────────────────────
-function parseTextInput(text) {
-  // Strip email header lines (line-by-line, safe — avoids eating device lines)
-  const EMAIL_JUNK = /^(summarize this email|inbox|re:|fwd:|from:|to me|to:|subject:|sent:|cc:|planbit|feb |mar |jan |apr |may |jun |jul |aug |sep |oct |nov |dec |http)/i;
-  const HAS_DEVICE = /\b(dell|hp|lenovo|apple|macbook|thinkpad|latitude|elitebook|surface|asus|acer|fujitsu|samsung|microsoft|iphone|ipad|galaxy)\b/i;
-
-  const lines = text
-    .split(/[\n;]+/)
-    .map(l => l.trim())
-    .filter(l => l.length > 5)
-    .filter(l => !EMAIL_JUNK.test(l) || HAS_DEVICE.test(l));
-  const devices = [];
-
-  for (const line of lines) {
-    // Extract qty: "60x", "- 60x", "60 x", "3×", leading number with optional dash/bullet
-    const qtyMatch = line.match(/^[\-\*\•\·]?\s*(\d+)\s*[xX×]/);
-    const qty = qtyMatch ? Math.min(parseInt(qtyMatch[1]), 500) : 1;
-    const rest = qtyMatch ? line.slice(qtyMatch[0].length).trim() : line;
-
-    // Must contain a recognisable brand/model keyword
-    const lrest = rest.toLowerCase();
-    const hasBrand = ['dell','hp','lenovo','apple','macbook','thinkpad','latitude','elitebook',
-                      'surface','asus','acer','fujitsu','toshiba','samsung','microsoft'].some(b => lrest.includes(b));
-    if (!hasBrand) continue;
-
-    // Extract RAM: 8GB, 16 GB, 32GB
-    const ramMatch = rest.match(/\b(4|8|16|32|64|128)\s*GB?\b/i);
-    const ram = ramMatch ? ramMatch[1] + 'GB' : '';
-
-    // Extract SSD: 256GB, 512 GB, 1TB — but not RAM value if already found
-    let ssd = '';
-    const ssdMatches = [...rest.matchAll(/\b(\d+)\s*(GB|TB)\b/gi)];
-    for (const m of ssdMatches) {
-      const num = m[1], unit = m[2].toUpperCase();
-      const gb = unit === 'TB' ? parseInt(num) * 1024 : parseInt(num);
-      if ([128,240,256,480,512,960,1024,2048].includes(gb)) { ssd = gb + 'GB'; break; }
-    }
-
-    // Extract CPU gen hint: i3/i5/i7/i9 + generation
-    const cpuMatch = rest.match(/[iI][3579][-\s]?(\d{2}|\d{4,5})[A-Za-z0-9]*/);
-    const cpu = cpuMatch ? cpuMatch[0] : '';
-
-    // Model: take up to first / or , or spec indicator
-    const modelRaw = rest.split(/[\/,]|\b(i[3579][-\s]|\d+GB|\d+TB|Gen\d|M[12]\b)/)[0].trim();
-    const model = modelRaw.replace(/^[-\*\•\·\s]+/, '').trim();
-
-    // Always push ONE row; qty is stored for display (avoids 60x duplicate rows)
-    devices.push({ model, cpu, ram, ssd });
-  }
-  return devices;
-}
 
 // ─── ROUTE 4: Generate HTML report ──────────────────────────────────────────
 router.post('/api/report', (req, res) => {
