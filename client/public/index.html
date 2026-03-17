@@ -2627,6 +2627,9 @@ async function doAiQuote() {
   loadEl.classList.add('active');
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+  // Start timing
+  const startTime = performance.now();
+
   // Progress bar animation (fills to ~90% over ~12s, then completes on response)
   const progressBar = document.getElementById('ai-progress-bar');
   progressBar.style.width = '0%';
@@ -2669,7 +2672,12 @@ async function doAiQuote() {
     if (!data.ok) throw new Error(data.error || 'Unknown error');
 
     _lastAiResultPlainText = data.result;
-    textEl.innerHTML = formatAiResult(data.result);
+    const elapsed = ((performance.now() - startTime) / 1000);
+    const timeStr = elapsed >= 60
+      ? Math.floor(elapsed / 60) + ' min ' + Math.round(elapsed % 60) + 's'
+      : elapsed.toFixed(1) + 's';
+    textEl.innerHTML = formatAiResult(data.result)
+      + '<div style="margin-top:16px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-style:italic;text-align:right;">⏱ Generated in ' + timeStr + '</div>';
     document.getElementById('ai-export-row').style.display = 'flex';
   } catch (err) {
     clearInterval(progressInterval);
