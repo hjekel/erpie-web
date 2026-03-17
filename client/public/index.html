@@ -3564,13 +3564,29 @@ function loadBatchExample() {
 }
 
 function clearBatchInput() {
+  // Clear text area
   document.getElementById('batch-input').value = '';
+  // Clear deal name
   document.getElementById('batch-deal-name').value = '';
+  // Reset file input so the same file can be re-uploaded
+  document.getElementById('batch-file-input').value = '';
+  // Hide processing stream
   document.getElementById('processing-stream').style.display = 'none';
   document.getElementById('processing-stream').innerHTML = '';
+  // Hide results summary section
   document.getElementById('batch-results-summary').style.display = 'none';
+  // Hide timing & insight lines
   document.getElementById('batch-timing-line').style.display = 'none';
+  document.getElementById('batch-insight-line').textContent = '';
+  // Clear results table body
+  const tbody = document.querySelector('.batch-table tbody');
+  if (tbody) tbody.innerHTML = '';
+  // Hide format badge
   hideFormatBadge();
+  // Remove toelichting block if present
+  const toel = document.getElementById('batch-toelichting');
+  if (toel) toel.remove();
+  // Reset state
   _batchFileName = '';
   _batchDealName = '';
   batchParsedGroups = [];
