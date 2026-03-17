@@ -541,7 +541,9 @@ router.post('/api/ai-quote', async (req, res) => {
     console.log('[ai-quote] result keys:', parsed.result ? Object.keys(parsed.result) : 'NO result key');
     if (parsed.result?.payloads) {
       console.log('[ai-quote] payloads count:', parsed.result.payloads.length);
-      console.log('[ai-quote] payloads[0]:', JSON.stringify(parsed.result.payloads[0]).slice(0, 300));
+      if (parsed.result.payloads.length > 0) {
+        console.log('[ai-quote] payloads[0]:', JSON.stringify(parsed.result.payloads[0]).slice(0, 300));
+      }
     }
 
     // Try multiple response shapes: result.payloads[0].text → result.text → result → raw

@@ -258,6 +258,7 @@ input, select, button { font-family: inherit; }
   align-items: center;
   gap: 10px;
   margin-left: auto;
+  flex: 1;
 }
 .ai-spinner-wrap.active { display: flex; }
 .ai-spinner {
@@ -273,6 +274,22 @@ input, select, button { font-family: inherit; }
   font-weight: 500;
   color: #7c3aed;
   white-space: nowrap;
+}
+/* AI Progress bar */
+.ai-progress-wrap {
+  flex: 1;
+  height: 6px;
+  background: #7c3aed20;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-left: 8px;
+}
+.ai-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  border-radius: 3px;
+  transition: width 0.3s ease-out;
 }
 .ai-result-shimmer {
   background: linear-gradient(90deg, var(--surface2) 25%, #7c3aed10 50%, var(--surface2) 75%);
@@ -1332,7 +1349,9 @@ tbody tr:last-child { border-bottom: none; }
     <!-- Button row -->
     <div class="button-row">
       <button class="btn btn-ghost" onclick="clearForm()" data-i18n="clearForm">Clear Form</button>
-      <button class="btn btn-ghost" onclick="showExample()" data-i18n="showExample">Show Example</button>
+      <button class="btn btn-ghost" onclick="showExampleDell()" title="Dell Latitude 5530 i5-1245U">💻 Dell</button>
+      <button class="btn btn-ghost" onclick="showExampleHP()" title="HP EliteBook 840 G9 i5-1245U">💻 HP</button>
+      <button class="btn btn-ghost" onclick="showExampleApple()" title="MacBook Pro 14&quot; M1 Pro">🍎 Apple</button>
       <button class="btn btn-ai" id="btn-ai-quote">🤖 <span data-i18n="getAiAnalysis">Get AI Analysis</span></button>
     </div>
 
@@ -1344,6 +1363,7 @@ tbody tr:last-child { border-bottom: none; }
         <button type="button" class="search-btn" onclick="openGoogleSearch()">🔎 Google</button>
         <button type="button" class="search-btn b2b" onclick="openITGigant()">🏢 IT Gigant</button>
         <button type="button" class="search-btn b2b" onclick="openTroostwijk()">🔨 Troostwijk</button>
+        <button type="button" class="search-btn b2b" onclick="openBrokerSite()">🌐 The Broker Site</button>
       </div>
       <div class="button-row-label" data-i18n="b2cReference">B2C Reference Prices</div>
       <div class="search-buttons">
@@ -1378,6 +1398,7 @@ tbody tr:last-child { border-bottom: none; }
         <span id="ai-loading" class="ai-spinner-wrap">
           <span class="ai-spinner"></span>
           <span class="ai-spinner-text">AI is analyzing...</span>
+          <div class="ai-progress-wrap"><div class="ai-progress-bar" id="ai-progress-bar"></div></div>
         </span>
       </div>
       <div id="ai-result-text" style="background:var(--surface2);border-radius:8px;padding:16px;font-size:14px;line-height:1.7;color:var(--text);white-space:pre-wrap;font-family:inherit;"></div>
@@ -2193,29 +2214,81 @@ function clearForm() {
 // ══════════════════════════════════════════════════════════════════════
 // SHOW EXAMPLE
 // ══════════════════════════════════════════════════════════════════════
-function showExample() {
+function showExample() { showExampleDell(); }
+
+function showExampleDell() {
   document.getElementById('brand').value = 'dell';
   document.getElementById('brand').dispatchEvent(new Event('change'));
-
   setTimeout(() => {
-    document.getElementById('model').value = 'latitude-7xxx';
+    document.getElementById('model').value = 'latitude-5xxx';
     document.getElementById('deviceType').value = 'notebook';
     document.getElementById('cpuFamily').value = 'i5';
     document.getElementById('cpuFamily').dispatchEvent(new Event('change'));
-
     setTimeout(() => {
-      document.getElementById('cpuGen').value = '13';
-      document.getElementById('cpuModel').value = 'i5-1345U';
+      document.getElementById('cpuGen').value = '12';
+      document.getElementById('cpuModel').value = 'i5-1245U';
       document.getElementById('ram').value = '16';
       document.getElementById('ssd').value = '256';
+      document.getElementById('grade').value = 'B';
+      document.getElementById('keyboard').value = 'qwerty-eu';
+      document.getElementById('region').value = 'EU';
+      document.getElementById('battery').value = 'good';
+      document.getElementById('quantity').value = '50';
+      document.getElementById('keyboard-warning').style.display = 'none';
+    }, 50);
+  }, 50);
+}
+
+function showExampleHP() {
+  document.getElementById('brand').value = 'hp';
+  document.getElementById('brand').dispatchEvent(new Event('change'));
+  setTimeout(() => {
+    document.getElementById('model').value = 'elitebook-8xx';
+    document.getElementById('deviceType').value = 'notebook';
+    document.getElementById('cpuFamily').value = 'i5';
+    document.getElementById('cpuFamily').dispatchEvent(new Event('change'));
+    setTimeout(() => {
+      document.getElementById('cpuGen').value = '12';
+      document.getElementById('cpuModel').value = 'i5-1245U';
+      document.getElementById('ram').value = '16';
+      document.getElementById('ssd').value = '512';
       document.getElementById('grade').value = 'A';
       document.getElementById('keyboard').value = 'qwerty-eu';
       document.getElementById('region').value = 'EU';
       document.getElementById('battery').value = 'good';
-      document.getElementById('quantity').value = '1';
+      document.getElementById('quantity').value = '25';
       document.getElementById('keyboard-warning').style.display = 'none';
     }, 50);
   }, 50);
+}
+
+function showExampleApple() {
+  document.getElementById('brand').value = 'apple';
+  document.getElementById('brand').dispatchEvent(new Event('change'));
+  setTimeout(() => {
+    document.getElementById('model').value = 'macbook-pro-14';
+    document.getElementById('deviceType').value = 'notebook';
+    document.getElementById('cpuFamily').value = 'm1';
+    document.getElementById('cpuFamily').dispatchEvent(new Event('change'));
+    setTimeout(() => {
+      document.getElementById('cpuGen').value = 'pro';
+      document.getElementById('cpuModel').value = '';
+      document.getElementById('ram').value = '16';
+      document.getElementById('ssd').value = '512';
+      document.getElementById('grade').value = 'A';
+      document.getElementById('keyboard').value = 'qwerty-eu';
+      document.getElementById('region').value = 'EU';
+      document.getElementById('battery').value = 'good';
+      document.getElementById('quantity').value = '10';
+      document.getElementById('keyboard-warning').style.display = 'none';
+    }, 50);
+  }, 50);
+}
+
+// ── The Broker Site search ──────────────────────────────────────
+function openBrokerSite() {
+  const q = buildSearchQuery();
+  window.open('https://www.thebrokersite.com/search?q=' + q, '_blank');
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -2294,6 +2367,17 @@ async function doAiQuote() {
   loadEl.classList.add('active');
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+  // Progress bar animation (fills to ~90% over ~12s, then completes on response)
+  const progressBar = document.getElementById('ai-progress-bar');
+  progressBar.style.width = '0%';
+  let progress = 0;
+  const progressInterval = setInterval(() => {
+    // Fast at start, slows down approaching 90%
+    const remaining = 90 - progress;
+    progress += remaining * 0.06;
+    progressBar.style.width = Math.min(progress, 90) + '%';
+  }, 300);
+
   try {
     const res = await fetch('/erpie/api/ai-quote', {
       method: 'POST',
@@ -2317,15 +2401,27 @@ async function doAiQuote() {
     });
     const data = await res.json();
 
+    // Complete progress bar
+    clearInterval(progressInterval);
+    progressBar.style.width = '100%';
+
     if (!data.ok) throw new Error(data.error || 'Unknown error');
 
     textEl.textContent = data.result;
   } catch (err) {
+    clearInterval(progressInterval);
+    progressBar.style.width = '100%';
+    progressBar.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
     errorEl.textContent   = 'AI analyse mislukt: ' + err.message;
     errorEl.style.display = 'block';
   } finally {
     loadEl.classList.remove('active');
     textEl.classList.remove('ai-result-shimmer');
+    // Reset progress bar after fade
+    setTimeout(() => {
+      progressBar.style.width = '0%';
+      progressBar.style.background = 'linear-gradient(90deg, #7c3aed, #a78bfa)';
+    }, 1000);
   }
 }
 
@@ -3684,7 +3780,7 @@ const TRANSLATIONS = {
     cpu: 'CPU', family: 'FAMILIE', generation: 'GENERATIE', fullModel: 'VOLLEDIG MODEL (OPTIONEEL)',
     specs: 'SPECIFICATIES', ram: 'RAM', ssd: 'SSD', grade: 'CONDITIE', keyboard: 'TOETSENBORD',
     context: 'CONTEXT', region: 'REGIO', battery: 'BATTERIJ (NOTEBOOK)', quantity: 'AANTAL',
-    clearForm: 'Formulier Wissen', showExample: 'Toon Voorbeeld', getAiAnalysis: 'AI Analyse',
+    clearForm: 'Formulier Wissen', getAiAnalysis: 'AI Analyse',
     livePriceCheck: '🔍 LIVE PRIJS CHECK',
     generalB2B: 'ALGEMEEN & B2B MARKTPLAATSEN', b2cReference: 'B2C REFERENTIEPRIJZEN',
     serialCheck: '🔢 SERIENUMMER CHECK',
@@ -3709,7 +3805,7 @@ const TRANSLATIONS = {
     cpu: 'CPU', family: 'FAMILY', generation: 'GENERATION', fullModel: 'FULL MODEL (OPTIONAL)',
     specs: 'SPECS', ram: 'RAM', ssd: 'SSD', grade: 'GRADE', keyboard: 'KEYBOARD',
     context: 'CONTEXT', region: 'REGION', battery: 'BATTERY (NOTEBOOK)', quantity: 'QUANTITY',
-    clearForm: 'Clear Form', showExample: 'Show Example', getAiAnalysis: 'AI Analysis',
+    clearForm: 'Clear Form', getAiAnalysis: 'AI Analysis',
     livePriceCheck: '🔍 LIVE PRICE CHECK',
     generalB2B: 'GENERAL & B2B MARKETPLACES', b2cReference: 'B2C REFERENCE PRICES',
     serialCheck: '🔢 SERIAL NUMBER CHECK',
