@@ -60,12 +60,23 @@ const MODEL_DB = {
   'elitebook 840 g5': 'Gen8',  'elitebook 840 g6': 'Gen8',  'elitebook 840 g7': 'Gen10', 'elitebook 840 g8': 'Gen11',
   'elitebook 840 g9': 'Gen12', 'elitebook 840 g10': 'Gen13',
   'elitebook 850 g5': 'Gen8',  'elitebook 850 g6': 'Gen8',  'elitebook 850 g7': 'Gen10', 'elitebook 850 g8': 'Gen11',
+  // HP EliteBook AMD Ryzen
+  'elitebook 835 g7': 'Gen10', 'elitebook 835 g8': 'Gen11',
+  'elitebook 855 g7': 'Gen10', 'elitebook 855 g8': 'Gen11',
   'elitebook x360 1030 g2': 'Gen7', 'elitebook x360 1030 g3': 'Gen8', 'elitebook x360 1030 g4': 'Gen8',
   'elitebook x360 1030 g7': 'Gen10', 'elitebook x360 1030 g8': 'Gen11', 'elitebook x360 1030 g9': 'Gen12',
   'elitebook 1040 g9': 'Gen12', 'elitebook 1040 g10': 'Gen13',
   'x360 1030 g2': 'Gen7', 'x360 1030 g3': 'Gen8', 'x360 1030 g4': 'Gen8',
   'x360 1030 g7': 'Gen10', 'x360 1030 g8': 'Gen11', 'x360 1030 g9': 'Gen12',
   '1040 g9': 'Gen12', '1040 g10': 'Gen13',
+
+  // HP ZBook
+  'zbook firefly g7': 'Gen10', 'zbook firefly g8': 'Gen11', 'zbook firefly 14 g7': 'Gen10',
+  'zbook firefly 14 g8': 'Gen11', 'zbook firefly 15 g7': 'Gen10', 'zbook firefly 15 g8': 'Gen11',
+  'zbook fury g7': 'Gen10', 'zbook fury g8': 'Gen11', 'zbook fury 15 g7': 'Gen10',
+  'zbook fury 15 g8': 'Gen11', 'zbook fury 17 g7': 'Gen10', 'zbook fury 17 g8': 'Gen11',
+  'zbook power g7': 'Gen10', 'zbook power g8': 'Gen11',
+  'zbook studio g7': 'Gen10', 'zbook studio g8': 'Gen11',
 
   // HP ProBook
   'probook 430 g5': 'Gen8',  'probook 430 g6': 'Gen8',  'probook 430 g7': 'Gen10',
@@ -117,6 +128,24 @@ const APPLE_INTEL = {
   'macbook pro 16 2019': 390,
   'macbook pro 15 2019': 350,
   'macbook pro 13 2020': 350,
+};
+
+// ─── MODEL-SPECIFIC BASE PRICE OVERRIDES ─────────────────────────────────────
+// These override the generation-based price when the model is matched exactly.
+// Used for models whose market value differs significantly from gen-average.
+const MODEL_BASE_PRICE = {
+  // HP EliteBook AMD Ryzen (lower than Intel equivalents at same gen)
+  'elitebook 835 g7': 180, 'elitebook 835 g8': 200,
+  'elitebook 855 g7': 185, 'elitebook 855 g8': 210,
+  // HP ZBook workstations (premium over standard laptops)
+  'zbook firefly g7': 350, 'zbook firefly g8': 350,
+  'zbook firefly 14 g7': 350, 'zbook firefly 14 g8': 350,
+  'zbook firefly 15 g7': 350, 'zbook firefly 15 g8': 350,
+  'zbook fury g7': 420, 'zbook fury g8': 420,
+  'zbook fury 15 g7': 420, 'zbook fury 15 g8': 420,
+  'zbook fury 17 g7': 420, 'zbook fury 17 g8': 420,
+  'zbook power g7': 380, 'zbook power g8': 380,
+  'zbook studio g7': 400, 'zbook studio g8': 400,
 };
 
 // ─── REGION ADJUSTMENTS ───────────────────────────────────────────────────────
@@ -324,8 +353,23 @@ function calculatePrice(input) {
     reasoning.push(`Model matched: "${normModel}" → ${gen}`);
   }
 
-  const basePrice = BASE_PRICES[gen] ?? 0;
-  reasoning.push(`Base price ${gen}: €${basePrice}`);
+  // Check for model-specific base price override
+  let basePrice;
+  let modelOverrideKey = null;
+  for (const key of Object.keys(MODEL_BASE_PRICE)) {
+    if (normModel.includes(key)) {
+      if (!modelOverrideKey || key.length > modelOverrideKey.length) {
+        modelOverrideKey = key;
+      }
+    }
+  }
+  if (modelOverrideKey) {
+    basePrice = MODEL_BASE_PRICE[modelOverrideKey];
+    reasoning.push(`Model-specific base price for "${modelOverrideKey}": €${basePrice} (overrides ${gen} default €${BASE_PRICES[gen] ?? 0})`);
+  } else {
+    basePrice = BASE_PRICES[gen] ?? 0;
+    reasoning.push(`Base price ${gen}: €${basePrice}`);
+  }
 
   const rAdj = RAM_ADJ[ramGb] ?? 0;
   const sAdj = SSD_ADJ[ssdGb] ?? 0;
