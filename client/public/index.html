@@ -3877,6 +3877,7 @@ async function processBatch() {
   const rawInput = document.getElementById('batch-input').value.trim();
   if (!rawInput) { alert('Voer eerst asset data in of laad een voorbeeld.'); return; }
 
+  const batchStartTime = performance.now();
   const stream = document.getElementById('processing-stream');
   const summary = document.getElementById('batch-results-summary');
   stream.innerHTML = '';
@@ -3934,9 +3935,37 @@ async function processBatch() {
     stream.appendChild(warnCard);
   }
 
-  // Show results table
+  // Show results table + timing
   if (batchParsedGroups.length > 0) {
     showBatchResultsTable();
+    // Add timing and toelichting
+    const batchElapsed = ((performance.now() - batchStartTime) / 1000);
+    const batchTimeStr = batchElapsed >= 60
+      ? Math.floor(batchElapsed / 60) + ' min ' + Math.round(batchElapsed % 60) + 's'
+      : batchElapsed.toFixed(1) + 's';
+    const countWithPrice = batchParsedGroups.filter(a => a.historical?.erp > 0).length;
+    const countWithout = batchParsedGroups.length - countWithPrice;
+    const matchInfo = countWithout > 0
+      ? `${countWithPrice} van ${batchParsedGroups.length} assets hebben een historische prijs. Voor de overige ${countWithout} kun je de Live knoppen gebruiken of een Quick Quote uitvoeren.`
+      : `Alle ${batchParsedGroups.length} assets hebben een historische prijs.`;
+
+    // Remove old toelichting if exists
+    const oldToel = document.getElementById('batch-toelichting');
+    if (oldToel) oldToel.remove();
+
+    const toelDiv = document.createElement('div');
+    toelDiv.id = 'batch-toelichting';
+    toelDiv.style.cssText = 'margin-top:16px;padding:14px 18px;background:var(--surface2);border-radius:8px;font-size:12px;line-height:1.7;color:var(--muted);';
+    toelDiv.innerHTML = `
+      <div style="margin-bottom:8px;font-weight:700;font-size:13px;color:var(--text);">💡 Toelichting</div>
+      <div style="margin-bottom:6px;">${matchInfo}</div>
+      <div style="margin-bottom:6px;"><strong>Match niveaus:</strong> <span style="color:var(--go);font-weight:600;">EXACT</span> = zelfde model + specs, <span style="color:#B8860B;font-weight:600;">TIER</span> = vergelijkbaar model/generatie, <span style="color:var(--muted);">NONE</span> = geen historische data.</div>
+      <div style="margin-bottom:6px;"><strong>Confidence %</strong> geeft aan hoe betrouwbaar de historische prijs is (gebaseerd op aantal eerdere deals en depreciatie).</div>
+      <div><strong>Live knoppen</strong> (🔎 🏢) openen marktplaatsen om de huidige marktprijs te verifiëren.</div>
+      <div style="margin-top:10px;text-align:right;font-style:italic;">⏱ Verwerkt in ${batchTimeStr} · ${batchParsedGroups.length} assets · ${batchParsedGroups.reduce((s, a) => s + a.quantity, 0)} stuks</div>
+    `;
+    const summaryEl = document.getElementById('batch-results-summary');
+    summaryEl.appendChild(toelDiv);
   }
 }
 
