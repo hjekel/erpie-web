@@ -81,6 +81,7 @@ function extractRAM(s) {
 
 function extractSSD(s) {
   // "512GB SSD", "SSD 512GB", "256 GB", "1TB SSD", "1024GB"
+  const KNOWN_SSD_SIZES = new Set([120,128,240,256,480,512,960,1024,2048]);
   const ssdM = s.match(/(?:SSD\s*)?(\d+)\s*(GB|TB)\s*(?:SSD|M\.?2|NVMe|SATA)?/gi);
   if (!ssdM) return '';
   for (const match of ssdM) {
@@ -89,10 +90,16 @@ function extractSSD(s) {
     const num = parseInt(numM[1]);
     const unit = numM[2].toUpperCase();
     const gb = unit === 'TB' ? num * 1024 : num;
-    // Typical SSD sizes (not RAM)
-    if ([120,128,240,256,480,512,960,1024,2048,256000].includes(gb) || gb >= 100) {
-      return gb + 'GB';
+    // Accept known SSD sizes directly
+    if (KNOWN_SSD_SIZES.has(gb)) return gb + 'GB';
+    // For non-standard sizes (600-999 range), only accept if SSD/NVMe/M.2 keyword is present
+    // This prevents model numbers like 835, 855, 640, 650 from being treated as SSD
+    if (gb >= 600 && gb < 1000) {
+      if (/SSD|NVMe|M\.?2|SATA/i.test(match)) return gb + 'GB';
+      continue; // skip — likely a model number
     }
+    // Accept other sizes > 1000 (e.g. 2000GB)
+    if (gb >= 100) return gb + 'GB';
   }
   return '';
 }
@@ -365,7 +372,11 @@ function parseGenericHeaders(wb) {
             }
           });
         }
+        console.log(`[pivot-merge] Merged spec row into "${prev.model}" (cpu=${cpu||'-'}, ram=${ram||'-'}, ssd=${ssd||'-'}, grade=${grade||'-'})`);
         continue;
+      }
+      if (!hasModel && hasSpecs && lastModelIdx < 0) {
+        console.log(`[pivot-skip] Spec-only row skipped (no prior model): cpu=${cpu||'-'}, ram=${ram||'-'}, ssd=${ssd||'-'}`);
       }
 
       if (!hasModel) continue; // no model and no previous row to merge into
@@ -389,6 +400,7 @@ function parseGenericHeaders(wb) {
       lastModelIdx = results.length - 1;
     }
   }
+  console.log(`[parseGenericHeaders] Parsed ${results.length} devices from ${wb.SheetNames.length} sheet(s)`);
   return results;
 }
 
