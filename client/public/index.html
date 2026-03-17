@@ -453,6 +453,7 @@ tbody tr:last-child { border-bottom: none; }
   cursor: pointer;
   transition: all 0.15s ease;
 }
+.serial-btn img { height: 16px; width: 16px; object-fit: contain; }
 .serial-btn:hover { border-color: var(--accent); }
 .serial-btn.primary { border-color: var(--accent); background: var(--accent); color: white; }
 .serial-btn.primary:hover { filter: brightness(1.1); }
@@ -511,20 +512,37 @@ tbody tr:last-child { border-bottom: none; }
 
 /* ── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .header { padding: 0 16px; }
-  .main { padding: 16px; }
-  .form-section { padding: 12px 14px; }
-  .form-row { grid-template-columns: 1fr; }
+  .header { padding: 0 12px; height: 50px; }
+  .header .logo { font-size: 18px; }
+  .header .badge { display: none; }
+  .main { padding: 10px; }
+  .tabs { padding: 0 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab { padding: 10px 14px; font-size: 13px; white-space: nowrap; }
+  /* Hide advanced tabs on mobile */
+  .tab[data-tab="training"],
+  .tab[data-tab="ptolemeus"],
+  .tab[data-tab="zelfstudie"] { display: none; }
+  .form-section { padding: 10px 12px; margin-bottom: 10px; }
+  .form-section-title { font-size: 12px; }
+  .form-row { grid-template-columns: 1fr; gap: 8px; }
+  .form-row.four-col { grid-template-columns: 1fr 1fr; }
   .summary-cards { grid-template-columns: repeat(2, 1fr); }
-  .button-row { flex-direction: column; }
-  .button-row .btn { width: 100%; text-align: center; }
-  .search-buttons { flex-direction: column; }
-  .search-btn { width: 100%; justify-content: center; }
+  .button-row { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  .button-row .btn { text-align: center; }
+  .btn-clear { padding: 8px 12px; font-size: 12px; }
+  .btn-ai-green { padding: 10px 18px; font-size: 14px; }
+  .btn-brand { padding: 6px 10px; font-size: 12px; }
+  .search-buttons { flex-wrap: wrap; }
+  .search-btn { padding: 6px 10px; font-size: 12px; }
   .serial-input-row { flex-direction: column; }
-  .serial-buttons { flex-direction: column; }
-  .serial-btn { width: 100%; justify-content: center; }
+  .serial-buttons { flex-wrap: wrap; }
+  .serial-btn { padding: 6px 10px; font-size: 12px; }
   .lang-switch { margin-right: 0; }
-  .help-content { padding: 20px; }
+  .help-content { padding: 16px; }
+  /* Compact AI result */
+  #ai-result-card { padding: 16px !important; margin-top: 12px !important; }
+  #ai-result-text { padding: 10px !important; font-size: 12px !important; line-height: 1.5 !important; }
+  #ai-export-row .btn { padding: 6px 10px; font-size: 11px; }
 }
 
 /* ── Batch Upload v2.5 ─────────────────────────────────────── */
@@ -761,10 +779,11 @@ tbody tr:last-child { border-bottom: none; }
 .conf-low { color: #ef4444; }
 
 @media (max-width: 640px) {
-  .batch-actions { flex-direction: column; }
-  .batch-actions .btn { width: 100%; }
-  .results-summary-bar { flex-direction: column; gap: 8px; }
-  .card-price-label { min-width: 80px; }
+  .batch-actions { flex-direction: column; gap: 6px; }
+  .batch-actions .btn { width: 100%; font-size: 13px; }
+  .batch-textarea { min-height: 120px; font-size: 12px; padding: 10px; }
+  .results-summary-bar { flex-direction: column; gap: 6px; }
+  .card-price-label { min-width: 70px; font-size: 12px; }
 }
 
 /* ── Training Tab ──────────────────────────────────────────────── */
@@ -1406,12 +1425,12 @@ tbody tr:last-child { border-bottom: none; }
         <input type="text" id="serialNumber" data-i18n-placeholder="serialPlaceholder" placeholder="Enter serial number (optional)...">
       </div>
       <div class="serial-buttons" id="serial-buttons">
-        <button type="button" class="serial-btn" id="serial-dell" onclick="openDellSupport()">Dell Support</button>
-        <button type="button" class="serial-btn" id="serial-hp" onclick="openHPSupport()">HP Support</button>
-        <button type="button" class="serial-btn" id="serial-lenovo" onclick="openLenovoSupport()">Lenovo Support</button>
-        <button type="button" class="serial-btn" id="serial-apple" onclick="openAppleCheck()">Apple Check</button>
-        <button type="button" class="serial-btn" id="serial-microsoft" onclick="openMicrosoftSupport()">Microsoft</button>
-        <button type="button" class="serial-btn" id="serial-asus" onclick="openAsusSupport()">Asus</button>
+        <button type="button" class="serial-btn" id="serial-dell" onclick="openDellSupport()"><img src="https://www.google.com/s2/favicons?domain=dell.com&sz=32" alt=""> Dell Support</button>
+        <button type="button" class="serial-btn" id="serial-hp" onclick="openHPSupport()"><img src="https://www.google.com/s2/favicons?domain=hp.com&sz=32" alt=""> HP Support</button>
+        <button type="button" class="serial-btn" id="serial-lenovo" onclick="openLenovoSupport()"><img src="https://www.google.com/s2/favicons?domain=lenovo.com&sz=32" alt=""> Lenovo Support</button>
+        <button type="button" class="serial-btn" id="serial-apple" onclick="openAppleCheck()"><img src="https://www.google.com/s2/favicons?domain=apple.com&sz=32" alt=""> Apple Check</button>
+        <button type="button" class="serial-btn" id="serial-microsoft" onclick="openMicrosoftSupport()"><img src="https://www.google.com/s2/favicons?domain=microsoft.com&sz=32" alt=""> Microsoft</button>
+        <button type="button" class="serial-btn" id="serial-asus" onclick="openAsusSupport()"><img src="https://www.google.com/s2/favicons?domain=asus.com&sz=32" alt=""> Asus</button>
       </div>
     </div>
 
