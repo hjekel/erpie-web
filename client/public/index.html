@@ -1261,8 +1261,9 @@ tbody tr:last-child { border-bottom: none; }
         </div>
         <div class="field">
           <label data-i18n="model">Model</label>
+          <input type="text" id="model-search" placeholder="🔍 Zoek model..." style="padding:6px 10px;font-size:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text);margin-bottom:4px;width:100%;box-sizing:border-box;display:none;" autocomplete="off">
           <select id="model">
-            <option value="" data-i18n="selectModel">Select brand first...</option>
+            <option value="" data-i18n="selectModel">Selecteer eerst een merk...</option>
           </select>
         </div>
         <div class="field">
@@ -1441,7 +1442,7 @@ tbody tr:last-child { border-bottom: none; }
         <h2 style="font-size:16px;font-weight:700;color:#B8860B;margin:0;">ERP Berekening</h2>
         <span id="ai-loading" class="ai-spinner-wrap">
           <span class="ai-spinner"></span>
-          <span class="ai-spinner-text">AI is analyzing...</span>
+          <span class="ai-spinner-text">ERP wordt berekend...</span>
           <div class="ai-progress-wrap"><div class="ai-progress-bar" id="ai-progress-bar"></div></div>
         </span>
       </div>
@@ -1855,90 +1856,245 @@ const BRANDS = [
 
 const MODELS = {
   dell: [
-    { value: 'latitude-5xxx', label: 'Latitude 5xxx Series' },
-    { value: 'latitude-7xxx', label: 'Latitude 7xxx Series' },
-    { value: 'latitude-9xxx', label: 'Latitude 9xxx Series' },
-    { value: 'precision-3xxx', label: 'Precision 3xxx' },
-    { value: 'precision-5xxx', label: 'Precision 5xxx' },
-    { value: 'precision-7xxx', label: 'Precision 7xxx' },
-    { value: 'optiplex-micro', label: 'OptiPlex Micro' },
-    { value: 'optiplex-sff', label: 'OptiPlex SFF' },
-    { value: 'optiplex-tower', label: 'OptiPlex Tower' },
-    { value: 'xps-13', label: 'XPS 13' },
-    { value: 'xps-15', label: 'XPS 15' },
-    { value: 'xps-17', label: 'XPS 17' },
-    { value: 'other', label: 'Other Dell' }
+    // Latitude (mainstream & premium notebooks)
+    { value: 'latitude-5410', label: 'Latitude 5410', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-5420', label: 'Latitude 5420', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-5430', label: 'Latitude 5430', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-5440', label: 'Latitude 5440', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-5450', label: 'Latitude 5450', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-5520', label: 'Latitude 5520', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-5530', label: 'Latitude 5530', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-5540', label: 'Latitude 5540', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-7410', label: 'Latitude 7410', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-7420', label: 'Latitude 7420', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-7430', label: 'Latitude 7430', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-7440', label: 'Latitude 7440', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-7450', label: 'Latitude 7450', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-9420', label: 'Latitude 9420', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-9430', label: 'Latitude 9430', group: 'Latitude', dtype: 'notebook' },
+    { value: 'latitude-9440', label: 'Latitude 9440', group: 'Latitude', dtype: 'notebook' },
+    // Precision (workstation)
+    { value: 'precision-3560', label: 'Precision 3560', group: 'Precision', dtype: 'workstation' },
+    { value: 'precision-3570', label: 'Precision 3570', group: 'Precision', dtype: 'workstation' },
+    { value: 'precision-3580', label: 'Precision 3580', group: 'Precision', dtype: 'workstation' },
+    { value: 'precision-3581', label: 'Precision 3581', group: 'Precision', dtype: 'workstation' },
+    { value: 'precision-5560', label: 'Precision 5560', group: 'Precision', dtype: 'workstation' },
+    { value: 'precision-5570', label: 'Precision 5570', group: 'Precision', dtype: 'workstation' },
+    { value: 'precision-5580', label: 'Precision 5580', group: 'Precision', dtype: 'workstation' },
+    { value: 'precision-7560', label: 'Precision 7560', group: 'Precision', dtype: 'workstation' },
+    { value: 'precision-7570', label: 'Precision 7570', group: 'Precision', dtype: 'workstation' },
+    { value: 'precision-7580', label: 'Precision 7580', group: 'Precision', dtype: 'workstation' },
+    // OptiPlex (desktop)
+    { value: 'optiplex-3080-micro', label: 'OptiPlex 3080 Micro', group: 'OptiPlex', dtype: 'mini' },
+    { value: 'optiplex-3090-micro', label: 'OptiPlex 3090 Micro', group: 'OptiPlex', dtype: 'mini' },
+    { value: 'optiplex-5080-sff', label: 'OptiPlex 5080 SFF', group: 'OptiPlex', dtype: 'desktop' },
+    { value: 'optiplex-5090-sff', label: 'OptiPlex 5090 SFF', group: 'OptiPlex', dtype: 'desktop' },
+    { value: 'optiplex-7080-micro', label: 'OptiPlex 7080 Micro', group: 'OptiPlex', dtype: 'mini' },
+    { value: 'optiplex-7090-micro', label: 'OptiPlex 7090 Micro', group: 'OptiPlex', dtype: 'mini' },
+    { value: 'optiplex-7010-micro', label: 'OptiPlex 7010 Micro', group: 'OptiPlex', dtype: 'mini' },
+    { value: 'optiplex-7010-sff', label: 'OptiPlex 7010 SFF', group: 'OptiPlex', dtype: 'desktop' },
+    { value: 'optiplex-7020-micro', label: 'OptiPlex 7020 Micro', group: 'OptiPlex', dtype: 'mini' },
+    { value: 'optiplex-7020-sff', label: 'OptiPlex 7020 SFF', group: 'OptiPlex', dtype: 'desktop' },
+    // XPS
+    { value: 'xps-13-9310', label: 'XPS 13 9310', group: 'XPS', dtype: 'notebook' },
+    { value: 'xps-13-9315', label: 'XPS 13 9315', group: 'XPS', dtype: 'notebook' },
+    { value: 'xps-13-plus-9320', label: 'XPS 13 Plus 9320', group: 'XPS', dtype: 'notebook' },
+    { value: 'xps-15-9510', label: 'XPS 15 9510', group: 'XPS', dtype: 'notebook' },
+    { value: 'xps-15-9520', label: 'XPS 15 9520', group: 'XPS', dtype: 'notebook' },
+    { value: 'xps-15-9530', label: 'XPS 15 9530', group: 'XPS', dtype: 'notebook' },
+    { value: 'xps-17-9710', label: 'XPS 17 9710', group: 'XPS', dtype: 'notebook' },
+    { value: 'xps-17-9720', label: 'XPS 17 9720', group: 'XPS', dtype: 'notebook' },
+    { value: 'other', label: 'Ander Dell model', group: 'Overig' }
   ],
   hp: [
-    { value: 'elitebook-8xx', label: 'EliteBook 8xx Series' },
-    { value: 'elitebook-1040', label: 'EliteBook 1040' },
-    { value: 'elitebook-x360', label: 'EliteBook x360' },
-    { value: 'elitebook-dragonfly', label: 'Elite Dragonfly' },
-    { value: 'probook-4xx', label: 'ProBook 4xx Series' },
-    { value: 'probook-6xx', label: 'ProBook 6xx Series' },
-    { value: 'zbook-firefly', label: 'ZBook Firefly' },
-    { value: 'zbook-power', label: 'ZBook Power' },
-    { value: 'zbook-studio', label: 'ZBook Studio' },
-    { value: 'zbook-fury', label: 'ZBook Fury' },
-    { value: 'elitedesk', label: 'EliteDesk' },
-    { value: 'prodesk', label: 'ProDesk' },
-    { value: 'other', label: 'Other HP' }
+    // EliteBook 800 series
+    { value: 'elitebook-830-g7', label: 'EliteBook 830 G7', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-830-g8', label: 'EliteBook 830 G8', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-830-g9', label: 'EliteBook 830 G9', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-830-g10', label: 'EliteBook 830 G10', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-840-g7', label: 'EliteBook 840 G7', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-840-g8', label: 'EliteBook 840 G8', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-840-g9', label: 'EliteBook 840 G9', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-840-g10', label: 'EliteBook 840 G10', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-850-g7', label: 'EliteBook 850 G7', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-850-g8', label: 'EliteBook 850 G8', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-850-g9', label: 'EliteBook 850 G9', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-850-g10', label: 'EliteBook 850 G10', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-860-g9', label: 'EliteBook 860 G9', group: 'EliteBook', dtype: 'notebook' },
+    { value: 'elitebook-860-g10', label: 'EliteBook 860 G10', group: 'EliteBook', dtype: 'notebook' },
+    // EliteBook 1040
+    { value: 'elitebook-1040-g7', label: 'EliteBook 1040 G7', group: 'EliteBook 1040', dtype: 'notebook' },
+    { value: 'elitebook-1040-g8', label: 'EliteBook 1040 G8', group: 'EliteBook 1040', dtype: 'notebook' },
+    { value: 'elitebook-1040-g9', label: 'EliteBook 1040 G9', group: 'EliteBook 1040', dtype: 'notebook' },
+    { value: 'elitebook-1040-g10', label: 'EliteBook 1040 G10', group: 'EliteBook 1040', dtype: 'notebook' },
+    // EliteBook x360
+    { value: 'elitebook-x360-830-g8', label: 'EliteBook x360 830 G8', group: 'EliteBook x360', dtype: 'notebook' },
+    { value: 'elitebook-x360-830-g9', label: 'EliteBook x360 830 G9', group: 'EliteBook x360', dtype: 'notebook' },
+    { value: 'elitebook-x360-1040-g8', label: 'EliteBook x360 1040 G8', group: 'EliteBook x360', dtype: 'notebook' },
+    { value: 'elitebook-x360-1040-g9', label: 'EliteBook x360 1040 G9', group: 'EliteBook x360', dtype: 'notebook' },
+    // Dragonfly
+    { value: 'dragonfly-g3', label: 'Elite Dragonfly G3', group: 'Elite Dragonfly', dtype: 'notebook' },
+    { value: 'dragonfly-g4', label: 'Elite Dragonfly G4', group: 'Elite Dragonfly', dtype: 'notebook' },
+    // ProBook
+    { value: 'probook-440-g8', label: 'ProBook 440 G8', group: 'ProBook', dtype: 'notebook' },
+    { value: 'probook-440-g9', label: 'ProBook 440 G9', group: 'ProBook', dtype: 'notebook' },
+    { value: 'probook-440-g10', label: 'ProBook 440 G10', group: 'ProBook', dtype: 'notebook' },
+    { value: 'probook-450-g8', label: 'ProBook 450 G8', group: 'ProBook', dtype: 'notebook' },
+    { value: 'probook-450-g9', label: 'ProBook 450 G9', group: 'ProBook', dtype: 'notebook' },
+    { value: 'probook-450-g10', label: 'ProBook 450 G10', group: 'ProBook', dtype: 'notebook' },
+    { value: 'probook-640-g8', label: 'ProBook 640 G8', group: 'ProBook', dtype: 'notebook' },
+    { value: 'probook-640-g9', label: 'ProBook 640 G9', group: 'ProBook', dtype: 'notebook' },
+    { value: 'probook-650-g8', label: 'ProBook 650 G8', group: 'ProBook', dtype: 'notebook' },
+    // ZBook
+    { value: 'zbook-firefly-14-g8', label: 'ZBook Firefly 14 G8', group: 'ZBook', dtype: 'workstation' },
+    { value: 'zbook-firefly-14-g9', label: 'ZBook Firefly 14 G9', group: 'ZBook', dtype: 'workstation' },
+    { value: 'zbook-firefly-15-g8', label: 'ZBook Firefly 15 G8', group: 'ZBook', dtype: 'workstation' },
+    { value: 'zbook-firefly-16-g9', label: 'ZBook Firefly 16 G9', group: 'ZBook', dtype: 'workstation' },
+    { value: 'zbook-power-g8', label: 'ZBook Power G8', group: 'ZBook', dtype: 'workstation' },
+    { value: 'zbook-power-g9', label: 'ZBook Power G9', group: 'ZBook', dtype: 'workstation' },
+    { value: 'zbook-studio-g8', label: 'ZBook Studio G8', group: 'ZBook', dtype: 'workstation' },
+    { value: 'zbook-studio-g9', label: 'ZBook Studio G9', group: 'ZBook', dtype: 'workstation' },
+    { value: 'zbook-fury-15-g8', label: 'ZBook Fury 15 G8', group: 'ZBook', dtype: 'workstation' },
+    { value: 'zbook-fury-16-g9', label: 'ZBook Fury 16 G9', group: 'ZBook', dtype: 'workstation' },
+    // EliteDesk / ProDesk (desktop)
+    { value: 'elitedesk-800-g6', label: 'EliteDesk 800 G6', group: 'Desktop', dtype: 'desktop' },
+    { value: 'elitedesk-800-g8', label: 'EliteDesk 800 G8 Mini', group: 'Desktop', dtype: 'mini' },
+    { value: 'elitedesk-800-g9', label: 'EliteDesk 800 G9 Mini', group: 'Desktop', dtype: 'mini' },
+    { value: 'prodesk-400-g7', label: 'ProDesk 400 G7', group: 'Desktop', dtype: 'desktop' },
+    { value: 'prodesk-400-g9', label: 'ProDesk 400 G9 Mini', group: 'Desktop', dtype: 'mini' },
+    { value: 'other', label: 'Ander HP model', group: 'Overig' }
   ],
   lenovo: [
-    { value: 'thinkpad-t', label: 'ThinkPad T Series' },
-    { value: 'thinkpad-x', label: 'ThinkPad X Series' },
-    { value: 'thinkpad-x1', label: 'ThinkPad X1 Carbon/Yoga' },
-    { value: 'thinkpad-l', label: 'ThinkPad L Series' },
-    { value: 'thinkpad-e', label: 'ThinkPad E Series' },
-    { value: 'thinkpad-p', label: 'ThinkPad P Series (Workstation)' },
-    { value: 'thinkcentre-m', label: 'ThinkCentre M Series' },
-    { value: 'thinkcentre-tiny', label: 'ThinkCentre Tiny' },
-    { value: 'ideapad', label: 'IdeaPad' },
-    { value: 'yoga', label: 'Yoga' },
-    { value: 'other', label: 'Other Lenovo' }
+    // ThinkPad T series
+    { value: 'thinkpad-t14-gen2', label: 'ThinkPad T14 Gen 2', group: 'ThinkPad T', dtype: 'notebook' },
+    { value: 'thinkpad-t14-gen3', label: 'ThinkPad T14 Gen 3', group: 'ThinkPad T', dtype: 'notebook' },
+    { value: 'thinkpad-t14-gen4', label: 'ThinkPad T14 Gen 4', group: 'ThinkPad T', dtype: 'notebook' },
+    { value: 'thinkpad-t14-gen5', label: 'ThinkPad T14 Gen 5', group: 'ThinkPad T', dtype: 'notebook' },
+    { value: 'thinkpad-t14s-gen2', label: 'ThinkPad T14s Gen 2', group: 'ThinkPad T', dtype: 'notebook' },
+    { value: 'thinkpad-t14s-gen3', label: 'ThinkPad T14s Gen 3', group: 'ThinkPad T', dtype: 'notebook' },
+    { value: 'thinkpad-t14s-gen4', label: 'ThinkPad T14s Gen 4', group: 'ThinkPad T', dtype: 'notebook' },
+    { value: 'thinkpad-t16-gen1', label: 'ThinkPad T16 Gen 1', group: 'ThinkPad T', dtype: 'notebook' },
+    { value: 'thinkpad-t16-gen2', label: 'ThinkPad T16 Gen 2', group: 'ThinkPad T', dtype: 'notebook' },
+    // ThinkPad X / X1
+    { value: 'thinkpad-x13-gen2', label: 'ThinkPad X13 Gen 2', group: 'ThinkPad X', dtype: 'notebook' },
+    { value: 'thinkpad-x13-gen3', label: 'ThinkPad X13 Gen 3', group: 'ThinkPad X', dtype: 'notebook' },
+    { value: 'thinkpad-x13-gen4', label: 'ThinkPad X13 Gen 4', group: 'ThinkPad X', dtype: 'notebook' },
+    { value: 'thinkpad-x1-carbon-gen9', label: 'ThinkPad X1 Carbon Gen 9', group: 'ThinkPad X1', dtype: 'notebook' },
+    { value: 'thinkpad-x1-carbon-gen10', label: 'ThinkPad X1 Carbon Gen 10', group: 'ThinkPad X1', dtype: 'notebook' },
+    { value: 'thinkpad-x1-carbon-gen11', label: 'ThinkPad X1 Carbon Gen 11', group: 'ThinkPad X1', dtype: 'notebook' },
+    { value: 'thinkpad-x1-carbon-gen12', label: 'ThinkPad X1 Carbon Gen 12', group: 'ThinkPad X1', dtype: 'notebook' },
+    { value: 'thinkpad-x1-yoga-gen6', label: 'ThinkPad X1 Yoga Gen 6', group: 'ThinkPad X1', dtype: 'notebook' },
+    { value: 'thinkpad-x1-yoga-gen7', label: 'ThinkPad X1 Yoga Gen 7', group: 'ThinkPad X1', dtype: 'notebook' },
+    { value: 'thinkpad-x1-yoga-gen8', label: 'ThinkPad X1 Yoga Gen 8', group: 'ThinkPad X1', dtype: 'notebook' },
+    // ThinkPad L
+    { value: 'thinkpad-l14-gen2', label: 'ThinkPad L14 Gen 2', group: 'ThinkPad L', dtype: 'notebook' },
+    { value: 'thinkpad-l14-gen3', label: 'ThinkPad L14 Gen 3', group: 'ThinkPad L', dtype: 'notebook' },
+    { value: 'thinkpad-l14-gen4', label: 'ThinkPad L14 Gen 4', group: 'ThinkPad L', dtype: 'notebook' },
+    { value: 'thinkpad-l15-gen2', label: 'ThinkPad L15 Gen 2', group: 'ThinkPad L', dtype: 'notebook' },
+    { value: 'thinkpad-l15-gen3', label: 'ThinkPad L15 Gen 3', group: 'ThinkPad L', dtype: 'notebook' },
+    // ThinkPad E
+    { value: 'thinkpad-e14-gen4', label: 'ThinkPad E14 Gen 4', group: 'ThinkPad E', dtype: 'notebook' },
+    { value: 'thinkpad-e14-gen5', label: 'ThinkPad E14 Gen 5', group: 'ThinkPad E', dtype: 'notebook' },
+    { value: 'thinkpad-e16-gen1', label: 'ThinkPad E16 Gen 1', group: 'ThinkPad E', dtype: 'notebook' },
+    // ThinkPad P (workstation)
+    { value: 'thinkpad-p14s-gen3', label: 'ThinkPad P14s Gen 3', group: 'ThinkPad P', dtype: 'workstation' },
+    { value: 'thinkpad-p14s-gen4', label: 'ThinkPad P14s Gen 4', group: 'ThinkPad P', dtype: 'workstation' },
+    { value: 'thinkpad-p16s-gen1', label: 'ThinkPad P16s Gen 1', group: 'ThinkPad P', dtype: 'workstation' },
+    { value: 'thinkpad-p16s-gen2', label: 'ThinkPad P16s Gen 2', group: 'ThinkPad P', dtype: 'workstation' },
+    // ThinkCentre (desktop)
+    { value: 'thinkcentre-m70q-gen2', label: 'ThinkCentre M70q Gen 2', group: 'ThinkCentre', dtype: 'mini' },
+    { value: 'thinkcentre-m70q-gen3', label: 'ThinkCentre M70q Gen 3', group: 'ThinkCentre', dtype: 'mini' },
+    { value: 'thinkcentre-m80q-gen2', label: 'ThinkCentre M80q Gen 2', group: 'ThinkCentre', dtype: 'mini' },
+    { value: 'thinkcentre-m80q-gen3', label: 'ThinkCentre M80q Gen 3', group: 'ThinkCentre', dtype: 'mini' },
+    { value: 'thinkcentre-m90q-gen2', label: 'ThinkCentre M90q Gen 2', group: 'ThinkCentre', dtype: 'mini' },
+    { value: 'thinkcentre-m90q-gen3', label: 'ThinkCentre M90q Gen 3', group: 'ThinkCentre', dtype: 'mini' },
+    // Other
+    { value: 'ideapad-5', label: 'IdeaPad 5', group: 'Consumer', dtype: 'notebook' },
+    { value: 'yoga-7', label: 'Yoga 7', group: 'Consumer', dtype: 'notebook' },
+    { value: 'other', label: 'Ander Lenovo model', group: 'Overig' }
   ],
   apple: [
-    { value: 'macbook-air', label: 'MacBook Air' },
-    { value: 'macbook-pro-13', label: 'MacBook Pro 13"' },
-    { value: 'macbook-pro-14', label: 'MacBook Pro 14"' },
-    { value: 'macbook-pro-15', label: 'MacBook Pro 15"' },
-    { value: 'macbook-pro-16', label: 'MacBook Pro 16"' },
-    { value: 'imac-21', label: 'iMac 21.5"' },
-    { value: 'imac-24', label: 'iMac 24"' },
-    { value: 'imac-27', label: 'iMac 27"' },
-    { value: 'mac-mini', label: 'Mac Mini' },
-    { value: 'mac-studio', label: 'Mac Studio' },
-    { value: 'mac-pro', label: 'Mac Pro' },
-    { value: 'other', label: 'Other Apple' }
+    // MacBook Air
+    { value: 'macbook-air-m1', label: 'MacBook Air M1 (2020)', group: 'MacBook Air', dtype: 'notebook' },
+    { value: 'macbook-air-m2', label: 'MacBook Air M2 (2022)', group: 'MacBook Air', dtype: 'notebook' },
+    { value: 'macbook-air-m3', label: 'MacBook Air M3 (2024)', group: 'MacBook Air', dtype: 'notebook' },
+    { value: 'macbook-air-13-2019', label: 'MacBook Air 13" (2019)', group: 'MacBook Air', dtype: 'notebook' },
+    // MacBook Pro 13"
+    { value: 'macbook-pro-13-m1', label: 'MacBook Pro 13" M1 (2020)', group: 'MacBook Pro 13"', dtype: 'notebook' },
+    { value: 'macbook-pro-13-m2', label: 'MacBook Pro 13" M2 (2022)', group: 'MacBook Pro 13"', dtype: 'notebook' },
+    { value: 'macbook-pro-13-2020', label: 'MacBook Pro 13" (2020 Intel)', group: 'MacBook Pro 13"', dtype: 'notebook' },
+    // MacBook Pro 14"
+    { value: 'macbook-pro-14-m1pro', label: 'MacBook Pro 14" M1 Pro (2021)', group: 'MacBook Pro 14"/16"', dtype: 'notebook' },
+    { value: 'macbook-pro-14-m2pro', label: 'MacBook Pro 14" M2 Pro (2023)', group: 'MacBook Pro 14"/16"', dtype: 'notebook' },
+    { value: 'macbook-pro-14-m3pro', label: 'MacBook Pro 14" M3 Pro (2023)', group: 'MacBook Pro 14"/16"', dtype: 'notebook' },
+    { value: 'macbook-pro-14-m4pro', label: 'MacBook Pro 14" M4 Pro (2024)', group: 'MacBook Pro 14"/16"', dtype: 'notebook' },
+    // MacBook Pro 16"
+    { value: 'macbook-pro-16-m1pro', label: 'MacBook Pro 16" M1 Pro/Max (2021)', group: 'MacBook Pro 14"/16"', dtype: 'notebook' },
+    { value: 'macbook-pro-16-m2pro', label: 'MacBook Pro 16" M2 Pro/Max (2023)', group: 'MacBook Pro 14"/16"', dtype: 'notebook' },
+    { value: 'macbook-pro-16-m3pro', label: 'MacBook Pro 16" M3 Pro/Max (2023)', group: 'MacBook Pro 14"/16"', dtype: 'notebook' },
+    // MacBook Pro 15" (older)
+    { value: 'macbook-pro-15-2019', label: 'MacBook Pro 15" (2019)', group: 'MacBook Pro 15"', dtype: 'notebook' },
+    // iMac
+    { value: 'imac-24-m1', label: 'iMac 24" M1 (2021)', group: 'iMac', dtype: 'aio' },
+    { value: 'imac-24-m3', label: 'iMac 24" M3 (2023)', group: 'iMac', dtype: 'aio' },
+    { value: 'imac-27-2020', label: 'iMac 27" (2020)', group: 'iMac', dtype: 'aio' },
+    // Mac Mini & Studio
+    { value: 'mac-mini-m1', label: 'Mac Mini M1 (2020)', group: 'Mac Mini/Studio', dtype: 'mini' },
+    { value: 'mac-mini-m2', label: 'Mac Mini M2 (2023)', group: 'Mac Mini/Studio', dtype: 'mini' },
+    { value: 'mac-mini-m2pro', label: 'Mac Mini M2 Pro (2023)', group: 'Mac Mini/Studio', dtype: 'mini' },
+    { value: 'mac-studio-m1max', label: 'Mac Studio M1 Max/Ultra (2022)', group: 'Mac Mini/Studio', dtype: 'mini' },
+    { value: 'mac-studio-m2max', label: 'Mac Studio M2 Max/Ultra (2023)', group: 'Mac Mini/Studio', dtype: 'mini' },
+    // Mac Pro
+    { value: 'mac-pro-2019', label: 'Mac Pro (2019)', group: 'Mac Pro', dtype: 'desktop' },
+    { value: 'other', label: 'Ander Apple model', group: 'Overig' }
   ],
   microsoft: [
-    { value: 'surface-pro', label: 'Surface Pro' },
-    { value: 'surface-laptop', label: 'Surface Laptop' },
-    { value: 'surface-book', label: 'Surface Book' },
-    { value: 'surface-go', label: 'Surface Go' },
-    { value: 'surface-studio', label: 'Surface Studio' },
-    { value: 'other', label: 'Other Surface' }
+    { value: 'surface-pro-7', label: 'Surface Pro 7', group: 'Surface Pro', dtype: 'tablet' },
+    { value: 'surface-pro-8', label: 'Surface Pro 8', group: 'Surface Pro', dtype: 'tablet' },
+    { value: 'surface-pro-9', label: 'Surface Pro 9', group: 'Surface Pro', dtype: 'tablet' },
+    { value: 'surface-pro-10', label: 'Surface Pro 10', group: 'Surface Pro', dtype: 'tablet' },
+    { value: 'surface-laptop-3', label: 'Surface Laptop 3', group: 'Surface Laptop', dtype: 'notebook' },
+    { value: 'surface-laptop-4', label: 'Surface Laptop 4', group: 'Surface Laptop', dtype: 'notebook' },
+    { value: 'surface-laptop-5', label: 'Surface Laptop 5', group: 'Surface Laptop', dtype: 'notebook' },
+    { value: 'surface-laptop-6', label: 'Surface Laptop 6', group: 'Surface Laptop', dtype: 'notebook' },
+    { value: 'surface-go-2', label: 'Surface Go 2', group: 'Surface Go', dtype: 'tablet' },
+    { value: 'surface-go-3', label: 'Surface Go 3', group: 'Surface Go', dtype: 'tablet' },
+    { value: 'surface-book-3', label: 'Surface Book 3', group: 'Surface Book', dtype: 'notebook' },
+    { value: 'surface-studio-2', label: 'Surface Studio 2+', group: 'Surface Studio', dtype: 'aio' },
+    { value: 'other', label: 'Ander Surface model', group: 'Overig' }
   ],
   asus: [
-    { value: 'zenbook', label: 'ZenBook' },
-    { value: 'vivobook', label: 'VivoBook' },
-    { value: 'expertbook', label: 'ExpertBook' },
-    { value: 'rog', label: 'ROG (Gaming)' },
-    { value: 'other', label: 'Other Asus' }
+    { value: 'expertbook-b5', label: 'ExpertBook B5', group: 'ExpertBook', dtype: 'notebook' },
+    { value: 'expertbook-b9', label: 'ExpertBook B9', group: 'ExpertBook', dtype: 'notebook' },
+    { value: 'zenbook-14', label: 'ZenBook 14', group: 'ZenBook', dtype: 'notebook' },
+    { value: 'zenbook-13', label: 'ZenBook 13', group: 'ZenBook', dtype: 'notebook' },
+    { value: 'vivobook-15', label: 'VivoBook 15', group: 'VivoBook', dtype: 'notebook' },
+    { value: 'vivobook-14', label: 'VivoBook 14', group: 'VivoBook', dtype: 'notebook' },
+    { value: 'rog-strix', label: 'ROG Strix', group: 'Gaming', dtype: 'notebook' },
+    { value: 'rog-zephyrus', label: 'ROG Zephyrus', group: 'Gaming', dtype: 'notebook' },
+    { value: 'other', label: 'Ander Asus model', group: 'Overig' }
   ],
   acer: [
-    { value: 'aspire', label: 'Aspire' },
-    { value: 'swift', label: 'Swift' },
-    { value: 'travelmate', label: 'TravelMate' },
-    { value: 'other', label: 'Other Acer' }
+    { value: 'aspire-5', label: 'Aspire 5', group: 'Consumer', dtype: 'notebook' },
+    { value: 'aspire-vero', label: 'Aspire Vero', group: 'Consumer', dtype: 'notebook' },
+    { value: 'swift-3', label: 'Swift 3', group: 'Consumer', dtype: 'notebook' },
+    { value: 'swift-5', label: 'Swift 5', group: 'Consumer', dtype: 'notebook' },
+    { value: 'travelmate-p2', label: 'TravelMate P2', group: 'Business', dtype: 'notebook' },
+    { value: 'travelmate-p4', label: 'TravelMate P4', group: 'Business', dtype: 'notebook' },
+    { value: 'travelmate-spin', label: 'TravelMate Spin', group: 'Business', dtype: 'notebook' },
+    { value: 'other', label: 'Ander Acer model', group: 'Overig' }
   ],
   fujitsu: [
-    { value: 'lifebook', label: 'LIFEBOOK' },
-    { value: 'esprimo', label: 'ESPRIMO' },
-    { value: 'other', label: 'Other Fujitsu' }
+    { value: 'lifebook-u7412', label: 'LIFEBOOK U7412', group: 'LIFEBOOK', dtype: 'notebook' },
+    { value: 'lifebook-u7512', label: 'LIFEBOOK U7512', group: 'LIFEBOOK', dtype: 'notebook' },
+    { value: 'lifebook-u9312', label: 'LIFEBOOK U9312', group: 'LIFEBOOK', dtype: 'notebook' },
+    { value: 'lifebook-e5412', label: 'LIFEBOOK E5412', group: 'LIFEBOOK', dtype: 'notebook' },
+    { value: 'esprimo-q7010', label: 'ESPRIMO Q7010', group: 'ESPRIMO', dtype: 'mini' },
+    { value: 'esprimo-q9010', label: 'ESPRIMO Q9010', group: 'ESPRIMO', dtype: 'mini' },
+    { value: 'other', label: 'Ander Fujitsu model', group: 'Overig' }
   ],
   other: [
-    { value: 'other', label: 'Specify in notes' }
+    { value: 'other', label: 'Specificeer in notities' }
   ]
 };
 
@@ -2058,24 +2214,83 @@ const KEYBOARDS = [
 // CASCADE LOGIC
 // ══════════════════════════════════════════════════════════════════════
 
+// ── Model dropdown with search & optgroups ───────────────────────
+function rebuildModelDropdown(brand, filter) {
+  const select = document.getElementById('model');
+  const searchInput = document.getElementById('model-search');
+  const prev = select.value;
+  select.innerHTML = '<option value="">Selecteer model...</option>';
+
+  if (!brand || !MODELS[brand]) {
+    searchInput.style.display = 'none';
+    return;
+  }
+
+  // Show search box when brand has many models
+  const models = MODELS[brand];
+  searchInput.style.display = models.length > 8 ? '' : 'none';
+
+  // Filter if search term provided
+  const q = (filter || '').toLowerCase().trim();
+  const filtered = q
+    ? models.filter(m => m.label.toLowerCase().includes(q) || (m.group || '').toLowerCase().includes(q))
+    : models;
+
+  // Build optgroups
+  const groups = new Map();
+  filtered.forEach(m => {
+    const g = m.group || '';
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g).push(m);
+  });
+
+  groups.forEach((items, groupName) => {
+    if (groupName && groups.size > 1) {
+      const og = document.createElement('optgroup');
+      og.label = groupName;
+      items.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.value;
+        opt.textContent = m.label;
+        og.appendChild(opt);
+      });
+      select.appendChild(og);
+    } else {
+      items.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.value;
+        opt.textContent = m.label;
+        select.appendChild(opt);
+      });
+    }
+  });
+
+  // Restore previous selection if still present
+  if (prev) select.value = prev;
+
+  // Auto-select if only one result
+  if (filtered.length === 1 && filtered[0].value !== 'other') {
+    select.value = filtered[0].value;
+    autoSetDeviceType(brand, select.value);
+  }
+}
+
+// Model search filter
+document.getElementById('model-search').addEventListener('input', function() {
+  const brand = document.getElementById('brand').value;
+  rebuildModelDropdown(brand, this.value);
+});
+
 // Brand → Model cascade
 document.getElementById('brand').addEventListener('change', function() {
   const brand = this.value;
-  const modelSelect = document.getElementById('model');
-  modelSelect.innerHTML = '<option value="">Select model...</option>';
-
-  if (MODELS[brand]) {
-    MODELS[brand].forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m.value;
-      opt.textContent = m.label;
-      modelSelect.appendChild(opt);
-    });
-  }
+  const searchInput = document.getElementById('model-search');
+  searchInput.value = '';
+  rebuildModelDropdown(brand);
 
   // Auto-set device type for known desktop models
-  const modelVal = modelSelect.value;
-  autoSetDeviceType(brand, modelVal);
+  const modelSelect = document.getElementById('model');
+  autoSetDeviceType(brand, modelSelect.value);
 
   // Highlight matching serial check button
   updateSerialButtons(brand);
@@ -2087,22 +2302,36 @@ document.getElementById('model').addEventListener('change', function() {
   autoSetDeviceType(brand, this.value);
 });
 
-function autoSetDeviceType(brand, model) {
+function autoSetDeviceType(brand, modelValue) {
+  // Use dtype from MODELS data if available
+  const brandModels = MODELS[brand] || [];
+  const modelEntry = brandModels.find(m => m.value === modelValue);
+  if (modelEntry && modelEntry.dtype) {
+    const dtypeMap = {
+      'notebook': 'notebook', 'workstation': 'workstation', 'desktop': 'desktop',
+      'mini': 'mini', 'aio': 'aio', 'tablet': 'tablet'
+    };
+    if (dtypeMap[modelEntry.dtype]) {
+      document.getElementById('deviceType').value = dtypeMap[modelEntry.dtype];
+      return;
+    }
+  }
+  // Fallback: keyword matching for older/custom values
   const desktopModels = ['optiplex-micro', 'optiplex-sff', 'optiplex-tower', 'elitedesk', 'prodesk', 'thinkcentre-m', 'thinkcentre-tiny', 'mac-mini', 'mac-pro', 'esprimo'];
   const aioModels = ['imac-21', 'imac-24', 'imac-27', 'surface-studio'];
   const tabletModels = ['surface-pro', 'surface-go'];
   const miniModels = ['optiplex-micro', 'thinkcentre-tiny', 'mac-mini'];
   const wsModels = ['precision-3xxx', 'precision-5xxx', 'precision-7xxx', 'zbook-firefly', 'zbook-power', 'zbook-studio', 'zbook-fury', 'thinkpad-p', 'mac-studio'];
 
-  if (miniModels.includes(model)) {
+  if (miniModels.includes(modelValue)) {
     document.getElementById('deviceType').value = 'mini';
-  } else if (aioModels.includes(model)) {
+  } else if (aioModels.includes(modelValue)) {
     document.getElementById('deviceType').value = 'aio';
-  } else if (tabletModels.includes(model)) {
+  } else if (tabletModels.includes(modelValue)) {
     document.getElementById('deviceType').value = 'tablet';
-  } else if (wsModels.includes(model)) {
+  } else if (wsModels.includes(modelValue)) {
     document.getElementById('deviceType').value = 'workstation';
-  } else if (desktopModels.includes(model)) {
+  } else if (desktopModels.includes(modelValue)) {
     document.getElementById('deviceType').value = 'desktop';
   }
 }
@@ -2148,7 +2377,8 @@ document.getElementById('keyboard').addEventListener('change', function() {
 
 function buildSearchQuery() {
   const brand = document.getElementById('brand').selectedOptions[0]?.text || '';
-  const model = document.getElementById('model').selectedOptions[0]?.text || '';
+  const modelSel = document.getElementById('model');
+  const model = modelSel.selectedOptions[0]?.text || '';
   const cpuFamily = document.getElementById('cpuFamily').selectedOptions[0]?.text || '';
   const cpuGen = document.getElementById('cpuGen').selectedOptions[0]?.text || '';
   const ram = document.getElementById('ram').value;
@@ -2290,27 +2520,27 @@ function fillExample(opts) {
 }
 
 function showExampleDell() {
-  fillExample({ brand: 'dell', model: 'latitude-5xxx', cpuFamily: 'i5', cpuGen: '12',
+  fillExample({ brand: 'dell', model: 'latitude-5430', cpuFamily: 'i5', cpuGen: '12',
     cpuModel: 'i5-1245U', ram: '16', ssd: '256', grade: 'B', quantity: '50' });
 }
 function showExampleHP() {
-  fillExample({ brand: 'hp', model: 'elitebook-8xx', cpuFamily: 'i5', cpuGen: '12',
+  fillExample({ brand: 'hp', model: 'elitebook-840-g9', cpuFamily: 'i5', cpuGen: '12',
     cpuModel: 'i5-1245U', ram: '16', ssd: '512', grade: 'A', quantity: '25' });
 }
 function showExampleLenovo() {
-  fillExample({ brand: 'lenovo', model: 'thinkpad-t', cpuFamily: 'i5', cpuGen: '12',
+  fillExample({ brand: 'lenovo', model: 'thinkpad-t14-gen3', cpuFamily: 'i5', cpuGen: '12',
     cpuModel: 'i5-1245U', ram: '16', ssd: '256', grade: 'B', quantity: '30' });
 }
 function showExampleApple() {
-  fillExample({ brand: 'apple', model: 'macbook-pro-14', cpuFamily: 'm1', cpuGen: 'pro',
+  fillExample({ brand: 'apple', model: 'macbook-pro-14-m1pro', cpuFamily: 'm1', cpuGen: 'pro',
     cpuModel: '', ram: '16', ssd: '512', grade: 'A', quantity: '10' });
 }
 function showExampleMicrosoft() {
-  fillExample({ brand: 'microsoft', model: 'surface-pro', cpuFamily: 'i5', cpuGen: '12',
+  fillExample({ brand: 'microsoft', model: 'surface-pro-9', cpuFamily: 'i5', cpuGen: '12',
     cpuModel: 'i5-1245U', ram: '16', ssd: '256', grade: 'A', quantity: '15' });
 }
 function showExampleAsus() {
-  fillExample({ brand: 'asus', model: 'expertbook', cpuFamily: 'i5', cpuGen: '12',
+  fillExample({ brand: 'asus', model: 'expertbook-b5', cpuFamily: 'i5', cpuGen: '12',
     cpuModel: 'i5-1245U', ram: '16', ssd: '512', grade: 'B', quantity: '20' });
 }
 
@@ -2438,13 +2668,14 @@ async function doAiQuote() {
 
     if (!data.ok) throw new Error(data.error || 'Unknown error');
 
-    textEl.textContent = data.result;
+    _lastAiResultPlainText = data.result;
+    textEl.innerHTML = formatAiResult(data.result);
     document.getElementById('ai-export-row').style.display = 'flex';
   } catch (err) {
     clearInterval(progressInterval);
     progressBar.classList.add('error');
     progressBar.style.width = '100%';
-    errorEl.textContent   = 'AI analyse mislukt: ' + err.message;
+    errorEl.textContent   = 'ERP berekening mislukt: ' + err.message;
     errorEl.style.display = 'block';
   } finally {
     loadEl.classList.remove('active');
@@ -2457,9 +2688,105 @@ async function doAiQuote() {
   }
 }
 
+// ── AI Result Formatter ─────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatAiResult(text) {
+  const lines = text.split('\n');
+  let html = '';
+  let lastWasEmpty = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Skip separator lines (────)
+    if (/^[─━═\-]{3,}$/.test(trimmed)) {
+      html += '<hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">';
+      continue;
+    }
+
+    // Skip empty lines (but track for spacing)
+    if (!trimmed) { lastWasEmpty = true; continue; }
+
+    // ERPIE PRICING REPORT header
+    if (trimmed === 'ERPIE PRICING REPORT') {
+      html += '<div style="font-size:17px;font-weight:800;color:var(--accent);margin-bottom:4px;letter-spacing:0.5px;">ERPIE PRICING REPORT</div>';
+      lastWasEmpty = false;
+      continue;
+    }
+
+    // Section headers: Berekening, Bron, Toelichting, Specs
+    if (trimmed.startsWith('Berekening:')) {
+      html += '<div style="margin-top:18px;font-weight:800;font-size:14px;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:4px;margin-bottom:8px;">📊 Berekening</div>';
+      const rest = trimmed.slice('Berekening:'.length).trim();
+      if (rest) html += '<div style="font-size:13px;line-height:1.8;color:var(--text);">' + escHtml(rest) + '</div>';
+      lastWasEmpty = false;
+      continue;
+    }
+    if (/^Bron(nen)?:/.test(trimmed)) {
+      const key = trimmed.match(/^Bron(nen)?:/)[0];
+      html += '<div style="margin-top:18px;font-weight:800;font-size:14px;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:4px;margin-bottom:8px;">📚 Bronnen</div>';
+      const rest = trimmed.slice(key.length).trim();
+      if (rest) html += '<div style="font-size:13px;line-height:1.8;color:var(--text);">' + escHtml(rest) + '</div>';
+      lastWasEmpty = false;
+      continue;
+    }
+    if (trimmed.startsWith('Toelichting:')) {
+      html += '<div style="margin-top:18px;font-weight:800;font-size:14px;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:4px;margin-bottom:8px;">💡 Toelichting</div>';
+      const rest = trimmed.slice('Toelichting:'.length).trim();
+      if (rest) html += '<div style="font-size:13px;line-height:1.8;color:var(--text);">' + escHtml(rest) + '</div>';
+      lastWasEmpty = false;
+      continue;
+    }
+    if (trimmed.startsWith('Specs:')) {
+      html += '<div style="margin-top:8px;font-size:13px;color:var(--muted);font-style:italic;">' + escHtml(trimmed) + '</div>';
+      lastWasEmpty = false;
+      continue;
+    }
+
+    // Key-value lines: ERP per unit, Totaal ERP, Confidence
+    const kvMatch = trimmed.match(/^(ERP per unit|Totaal ERP|Confidence):\s*(.+)/);
+    if (kvMatch) {
+      const [, key, val] = kvMatch;
+      if (key === 'ERP per unit' || key === 'Totaal ERP') {
+        html += '<div style="font-size:16px;font-weight:800;margin:6px 0;"><span style="color:var(--muted);font-weight:600;">' + escHtml(key) + ':</span> <span style="color:var(--go);font-size:18px;">' + escHtml(val) + '</span></div>';
+      } else if (key === 'Confidence') {
+        const color = val.trim() === 'HIGH' ? 'var(--go)' : val.trim() === 'LOW' ? 'var(--nogo)' : '#B8860B';
+        html += '<div style="font-size:14px;font-weight:700;margin:4px 0;"><span style="color:var(--muted);font-weight:600;">' + escHtml(key) + ':</span> <span style="color:' + color + ';">' + escHtml(val) + '</span></div>';
+      }
+      lastWasEmpty = false;
+      continue;
+    }
+
+    // Device title line (e.g., "HP EliteBook 840 G9 | 25 stuks")
+    if (trimmed.includes(' | ') && !trimmed.includes(':') && lines.indexOf(line) < 10) {
+      html += '<div style="font-size:16px;font-weight:800;margin:4px 0;color:var(--text);">' + escHtml(trimmed) + '</div>';
+      lastWasEmpty = false;
+      continue;
+    }
+
+    // Calculation lines (contain €)
+    if (trimmed.includes('€') || trimmed.match(/^(Base ERP|RAM|SSD|Subtotaal|Grade|Brand|Finale)/)) {
+      html += '<div style="font-size:13px;line-height:1.8;color:var(--text);padding-left:8px;font-family:monospace;">' + escHtml(trimmed) + '</div>';
+      lastWasEmpty = false;
+      continue;
+    }
+
+    // Regular content
+    if (lastWasEmpty) html += '<div style="height:6px;"></div>';
+    html += '<div style="font-size:13.5px;line-height:1.8;color:var(--text);font-weight:500;">' + escHtml(trimmed) + '</div>';
+    lastWasEmpty = false;
+  }
+
+  return html;
+}
+
 // ── AI Result Export ─────────────────────────────────────────────
+let _lastAiResultPlainText = '';
 function getAiResultText() {
-  return document.getElementById('ai-result-text').textContent || '';
+  return _lastAiResultPlainText || document.getElementById('ai-result-text').textContent || '';
 }
 
 function copyAiResult() {
