@@ -307,18 +307,27 @@ function parseVendorQuote(wb) {
 function parseGenericHeaders(wb) {
   const results = [];
 
-  for (const name of wb.SheetNames) {
+  // Sort sheets by row count (most data first)
+  const sortedSheets = [...wb.SheetNames].sort((a, b) => {
+    const rowsA = XLSX.utils.sheet_to_json(wb.Sheets[a], { header: 1, defval: '' }).length;
+    const rowsB = XLSX.utils.sheet_to_json(wb.Sheets[b], { header: 1, defval: '' }).length;
+    return rowsB - rowsA;
+  });
+  console.log(`[parseGenericHeaders] Sheet order: ${sortedSheets.map(n => n + '(' + XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, defval: '' }).length + ' rows)').join(', ')}`);
+
+  for (const name of sortedSheets) {
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: '' });
     if (!rows.length) continue;
 
     // Find header row
     let headerRowIdx = -1;
     const COL_KEYS = {
+      brand:  ['manufacturer','brand','merk','vendor','make'],
       model:  ['model','device','modelname','computername','description','productname','name','item','assetname'],
-      cpu:    ['cpu','processor','proc'],
-      ram:    ['ram','memory','mem'],
-      ssd:    ['ssd','storage','hdd','disk','drive'],
-      grade:  ['grade','condition','quality'],
+      cpu:    ['cpu','processor','proc','cputype'],
+      ram:    ['ram','memory','mem','ramsizeoutgoing'],
+      ssd:    ['ssd','storage','hdd','disk','drive','hddsizeoutgoing'],
+      grade:  ['grade','condition','quality','cosmeticcategory'],
       serial: ['serial','serialnumber','sn','assettag','asset'],
       qty:    ['qty','quantity','count','units'],
     };
@@ -338,6 +347,7 @@ function parseGenericHeaders(wb) {
     for (const [field, keys] of Object.entries(COL_KEYS)) {
       colMap[field] = header.findIndex(h => keys.includes(h));
     }
+    console.log(`[parseGenericHeaders] Sheet "${name}" colMap:`, JSON.stringify(colMap));
 
     const mappedIdxs = new Set(Object.values(colMap).filter(i => i >= 0));
 
@@ -381,7 +391,14 @@ function parseGenericHeaders(wb) {
 
       if (!hasModel) continue; // no model and no previous row to merge into
 
-      const d = { model };
+      // Combine brand + model if brand column exists
+      const brandVal = colMap.brand >= 0 ? cellStr(row[colMap.brand]) : '';
+      let fullModel = model;
+      if (brandVal && !model.toLowerCase().startsWith(brandVal.toLowerCase())) {
+        fullModel = brandVal + ' ' + model;
+      }
+
+      const d = { model: fullModel };
       if (cpu)   d.cpu   = cpu;
       if (ram)   d.ram   = ram;
       if (ssd)   d.ssd   = ssd;
