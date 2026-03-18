@@ -132,8 +132,9 @@ function extractGrade(s) {
 // ─── FORMAT DETECTORS ────────────────────────────────────────────────────────
 
 function detectFormat(wb) {
-  // 1. PlanBit ARS — has "Customer Inventory" tab
-  if (wb.SheetNames.some(n => n.toLowerCase().includes('inventory'))) {
+  // 1. PlanBit ARS — has "Customer Inventory" tab or RITM-prefixed sheets
+  if (wb.SheetNames.some(n => n.toLowerCase().includes('inventory')) ||
+      wb.SheetNames.some(n => /^RITM/i.test(n.trim()))) {
     return 'ARS';
   }
 
@@ -174,9 +175,49 @@ function detectFormat(wb) {
 // ─── PARSERS ─────────────────────────────────────────────────────────────────
 
 function parseARS(wb) {
-  const sheetName = wb.SheetNames.find(n => n.toLowerCase().includes('inventory'));
-  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: '' });
-  return parseARSRows(rows);
+  let devices = [];
+
+  // 1. Parse primary "Customer Inventory" sheet
+  const invSheet = wb.SheetNames.find(n => n.toLowerCase().includes('inventory'));
+  if (invSheet) {
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[invSheet], { header: 1, defval: '' });
+    devices = parseARSRows(rows);
+    console.log(`[parseARS] Inventory sheet "${invSheet}": ${devices.length} devices`);
+  }
+
+  // 2. Also parse any "Quote Request" sheet for mixed summary+detail (planbitPrice training)
+  const quoteSheet = wb.SheetNames.find(n => /quote\s*request/i.test(n));
+  if (quoteSheet) {
+    const qRows = XLSX.utils.sheet_to_json(wb.Sheets[quoteSheet], { header: 1, defval: '' });
+    const summaryPrices = extractSummaryPrices(qRows);
+    if (Object.keys(summaryPrices).length > 0) {
+      console.log(`[parseARS] Quote Request summary prices:`, JSON.stringify(summaryPrices));
+      // Attach planbitPrice to matching devices
+      for (const d of devices) {
+        const modelKey = d.model.toLowerCase().replace(/\s+/g, ' ').trim();
+        for (const [pattern, price] of Object.entries(summaryPrices)) {
+          if (modelKey.includes(pattern) || pattern.includes(modelKey.split(' ').slice(-2).join(' '))) {
+            d.planbitPrice = price;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Parse RITM-prefixed sheets as separate device lists (GENERIC_HEADERS style)
+  const ritmSheets = wb.SheetNames.filter(n => /^RITM/i.test(n.trim()));
+  if (ritmSheets.length > 0) {
+    console.log(`[parseARS] Found ${ritmSheets.length} RITM sheet(s): ${ritmSheets.join(', ')}`);
+    // Build a temporary workbook-like object with only RITM sheets
+    const ritmWb = { SheetNames: ritmSheets, Sheets: {} };
+    for (const n of ritmSheets) ritmWb.Sheets[n] = wb.Sheets[n];
+    const ritmDevices = parseGenericHeaders(ritmWb);
+    console.log(`[parseARS] RITM sheets parsed: ${ritmDevices.length} additional devices`);
+    devices = devices.concat(ritmDevices);
+  }
+
+  return devices;
 }
 
 function parseARSSimple(wb) {
@@ -238,6 +279,27 @@ function parseARSRows(rows) {
   }
 
   return summaryDevices.length ? summaryDevices : detailDevices;
+}
+
+// Extract summary prices from a Quote Request sheet
+// Looks for rows with Product | Brand | Model | Processor | Qty | Price pattern
+function extractSummaryPrices(rows) {
+  const prices = {};
+  for (const row of rows) {
+    const col0 = cellStr(row[0]);
+    const col1 = cellStr(row[1]);
+    const col2 = cellStr(row[2]);
+    const col4 = row[4];
+    const col5 = row[5];
+    // Match summary rows: Product type | Brand | Model | Processor | Qty(number) | Price(number)
+    if (isProductType(col0) && col1.length > 0 && col2.length > 0 &&
+        typeof col4 === 'number' && typeof col5 === 'number' && col5 > 0) {
+      const modelKey = (col1 + ' ' + col2).toLowerCase().replace(/\s+/g, ' ').trim();
+      prices[modelKey] = col5;
+      console.log(`[extractSummaryPrices] "${modelKey}" → €${col5}`);
+    }
+  }
+  return prices;
 }
 
 function parseVendorQuote(wb) {
