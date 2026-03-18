@@ -950,6 +950,40 @@ router.get('/api/monitor', async (req, res) => {
   }
 });
 
+// ─── MONITOR DEALS ENDPOINT ──────────────────────────────────────────────────
+router.get('/api/monitor/deals', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const dhPath = path.join(process.env.HOME || '/home/openclaw', '.openclaw/workspace/DEAL_HISTORY.md');
+  try {
+    const content = fs.readFileSync(dhPath, 'utf8');
+    const deals = [];
+    const sections = content.split(/^###\s+/gm).slice(1); // split on ### headers
+    for (const section of sections) {
+      const lines = section.split('\n').filter(l => l.trim());
+      const name = lines[0] ? lines[0].trim() : '?';
+      // Extract fields from "- Key: value" lines
+      let date = '', devices = '', erp = 0, status = 'TBD';
+      for (const l of lines) {
+        const m = l.match(/Date:\s*([^|]+)/i);
+        if (m) date = m[1].trim();
+        const d = l.match(/Devices:\s*(\d+)/i);
+        if (d) devices = parseInt(d[1]);
+        const e = l.match(/ERPIE\s*ERP:\s*€?([\d.,]+)/i);
+        if (e) erp = parseFloat(e[1].replace('.', '').replace(',', '.'));
+        const s = l.match(/Status:\s*(WON|LOST|TBD)/i);
+        if (s) status = s[1].toUpperCase();
+        // Also check for "Feedback" prefix
+        if (/^Feedback/i.test(name)) status = 'FEEDBACK';
+      }
+      deals.push({ name, date, devices: devices || '—', erp: erp || null, status });
+    }
+    res.json({ ok: true, deals });
+  } catch (e) {
+    res.json({ ok: true, deals: [] });
+  }
+});
+
 // ─── START ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`ERPIE PriceFinder running on http://localhost:${PORT}`));

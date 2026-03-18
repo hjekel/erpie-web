@@ -1827,8 +1827,8 @@ Voorbeelden:
             <div class="monitor-stat-label">⏱ Uptime</div>
             <div class="monitor-stat-value" id="mon-uptime">—</div>
           </div>
-          <div class="monitor-stat">
-            <div class="monitor-stat-label">📊 Deals in History</div>
+          <div class="monitor-stat" style="cursor:pointer;" onclick="toggleDealPanel()" title="Klik voor deal overzicht">
+            <div class="monitor-stat-label">📊 Deals in History <span style="font-size:10px;opacity:.5;">▼</span></div>
             <div class="monitor-stat-value" id="mon-deals">—</div>
           </div>
           <div class="monitor-stat">
@@ -1844,6 +1844,16 @@ Voorbeelden:
             <div class="monitor-stat-value" id="mon-cost">—</div>
             <div style="font-size:10px;color:var(--muted);margin-top:2px;" id="mon-cost-detail"></div>
           </div>
+        </div>
+
+        <div id="monitor-deals-panel" style="display:none;margin-bottom:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;max-height:300px;overflow-y:auto;">
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">📋 DEAL HISTORY</div>
+          <table style="width:100%;font-size:11px;border-collapse:collapse;">
+            <thead><tr style="color:var(--muted);text-align:left;border-bottom:1px solid var(--border);">
+              <th style="padding:4px 6px;">Deal</th><th style="padding:4px 6px;">Datum</th><th style="padding:4px 6px;">Devices</th><th style="padding:4px 6px;">ERPIE €</th><th style="padding:4px 6px;">Status</th>
+            </tr></thead>
+            <tbody id="monitor-deals-tbody"></tbody>
+          </table>
         </div>
 
         <div class="monitor-log" id="monitor-log">Laden...</div>
@@ -5057,15 +5067,49 @@ async function fetchMonitorData() {
     // Cost
     document.getElementById('mon-cost').textContent = '€' + (data.totalCostToday ?? 0).toFixed(4);
     document.getElementById('mon-cost-detail').textContent = (data.tokensToday ?? 0).toLocaleString() + ' tokens · ' + (data.braveQueries ?? 0) + ' searches';
-    // Logs
+    // Logs — add timestamp if missing
     const logEl = document.getElementById('monitor-log');
-    logEl.textContent = (data.logs || []).join('\n') || 'Geen logs beschikbaar';
+    const now = new Date().toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const logLines = (data.logs || []).map(l => {
+      // PM2 lines start with "0|erpie-we | " — add time if no timestamp
+      return /^\d{2}:\d{2}/.test(l) ? l : `[${now}] ${l}`;
+    });
+    logEl.textContent = logLines.join('\n') || 'Geen logs beschikbaar';
     logEl.scrollTop = logEl.scrollHeight;
   } catch (e) {
     document.getElementById('monitor-dot').classList.add('offline');
     document.getElementById('monitor-status-text').textContent = 'OFFLINE';
     document.getElementById('monitor-status-text').style.color = '#d50000';
     document.getElementById('monitor-log').textContent = 'Kan geen verbinding maken met server: ' + e.message;
+  }
+}
+
+let _dealPanelOpen = false;
+async function toggleDealPanel() {
+  const panel = document.getElementById('monitor-deals-panel');
+  _dealPanelOpen = !_dealPanelOpen;
+  if (!_dealPanelOpen) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  try {
+    const res = await fetch('/erpie/api/monitor/deals');
+    const data = await res.json();
+    const tbody = document.getElementById('monitor-deals-tbody');
+    if (!data.deals || data.deals.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:8px;color:var(--muted);font-style:italic;">Geen deals gevonden</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.deals.map(d => {
+      const statusColor = d.status === 'WON' ? 'var(--go)' : d.status === 'LOST' ? '#d50000' : 'var(--muted)';
+      return `<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:4px 6px;color:var(--text);">${esc(d.name)}</td>
+        <td style="padding:4px 6px;color:var(--muted);">${esc(d.date)}</td>
+        <td style="padding:4px 6px;">${d.devices || '—'}</td>
+        <td style="padding:4px 6px;font-weight:600;">€${d.erp ? d.erp.toLocaleString() : '—'}</td>
+        <td style="padding:4px 6px;font-weight:600;color:${statusColor};">${esc(d.status)}</td>
+      </tr>`;
+    }).join('');
+  } catch (e) {
+    document.getElementById('monitor-deals-tbody').innerHTML = '<tr><td colspan="5" style="padding:8px;color:#d50000;">Fout: ' + e.message + '</td></tr>';
   }
 }
 
