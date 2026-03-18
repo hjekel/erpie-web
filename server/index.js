@@ -876,6 +876,60 @@ function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ─── MONITOR ENDPOINT ────────────────────────────────────────────────────────
+const _serverStartTime = Date.now();
+
+router.get('/api/monitor', async (req, res) => {
+  try {
+    const { execSync } = require('child_process');
+    const fs = require('fs');
+    const path = require('path');
+
+    // Uptime
+    const uptimeMs = Date.now() - _serverStartTime;
+    const uptimeSec = Math.floor(uptimeMs / 1000);
+    const h = Math.floor(uptimeSec / 3600);
+    const m = Math.floor((uptimeSec % 3600) / 60);
+    const uptime = h > 0 ? `${h}u ${m}m` : `${m}m`;
+
+    // PM2 logs
+    let logs = [];
+    try {
+      const raw = execSync('pm2 logs erpie-web --lines 20 --nostream 2>&1', { timeout: 5000 }).toString();
+      logs = raw.replace(/\x1b\[[0-9;]*m/g, '').split('\n').filter(l => l.trim()).slice(-20);
+    } catch (e) {
+      logs = ['(kon PM2 logs niet ophalen)'];
+    }
+
+    // Deal count from DEAL_HISTORY.md
+    let dealCount = 0;
+    const dhPath = path.join(process.env.HOME || '/home/openclaw', '.openclaw/workspace/DEAL_HISTORY.md');
+    try {
+      const dh = fs.readFileSync(dhPath, 'utf8');
+      dealCount = (dh.match(/^###\s/gm) || []).length;
+    } catch (e) { /* file not found */ }
+
+    // Memory last modified
+    let memoryLastModified = '—';
+    const memPath = path.join(process.env.HOME || '/home/openclaw', '.openclaw/workspace/MEMORY.md');
+    try {
+      const stat = fs.statSync(memPath);
+      memoryLastModified = stat.mtime.toISOString().slice(0, 16).replace('T', ' ');
+    } catch (e) { memoryLastModified = 'niet beschikbaar'; }
+
+    res.json({
+      ok: true,
+      serverTime: new Date().toISOString(),
+      uptime,
+      dealCount,
+      memoryLastModified,
+      logs
+    });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 // ─── START ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`ERPIE PriceFinder running on http://localhost:${PORT}`));

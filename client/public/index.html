@@ -521,7 +521,8 @@ tbody tr:last-child { border-bottom: none; }
   /* Hide advanced tabs on mobile */
   .tab[data-tab="training"],
   .tab[data-tab="ptolemeus"],
-  .tab[data-tab="zelfstudie"] { display: none; }
+  .tab[data-tab="zelfstudie"],
+  .tab[data-tab="monitor"] { display: none; }
   .form-section { padding: 10px 12px; margin-bottom: 10px; }
   .form-section-title { font-size: 12px; }
   .form-row { grid-template-columns: 1fr; gap: 8px; }
@@ -1143,6 +1144,18 @@ tbody tr:last-child { border-bottom: none; }
   border-radius: 2px;
 }
 
+/* ── Monitor Tab ──────────────────────────────────────────────── */
+.monitor-status { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+.monitor-dot { width:12px; height:12px; border-radius:50%; background:#00c853; animation: pulse-dot 1.5s infinite; }
+.monitor-dot.offline { background:#d50000; animation:none; }
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+.monitor-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-bottom:16px; }
+.monitor-stat { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; }
+.monitor-stat-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+.monitor-stat-value { font-size:18px; font-weight:700; color:var(--text); }
+.monitor-log { background:#0d0d0d; border:1px solid var(--border); border-radius:var(--radius); padding:12px; font-family:'Fira Code',monospace; font-size:11px; line-height:1.6; color:#8f8; max-height:400px; overflow-y:auto; white-space:pre-wrap; word-break:break-all; }
+.monitor-footer { font-size:11px; color:var(--muted); text-align:center; margin-top:12px; opacity:.6; }
+
 /* ── Zelfstudie Tab ────────────────────────────────────────────── */
 .zelfstudie-card {
   background: var(--surface);
@@ -1241,6 +1254,7 @@ tbody tr:last-child { border-bottom: none; }
   <div class="tab" data-tab="training" data-i18n="training">🎓 Training</div>
   <div class="tab" data-tab="ptolemeus" data-i18n="ptolemeus">📚 PTOLEMEUS</div>
   <div class="tab" data-tab="zelfstudie" data-i18n="zelfstudie">📖 Zelfstudie</div>
+  <div class="tab" data-tab="monitor">📡 Monitor</div>
 </div>
 
 <!-- Main -->
@@ -1789,6 +1803,47 @@ Voorbeelden:
         <div id="zelfstudie-list"></div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ── Monitor panel ────────────────────────────────────────────── -->
+  <div class="panel" id="panel-monitor">
+    <div class="form-card">
+      <div class="form-section">
+        <div class="form-section-title">📡 ERPIE Monitor</div>
+
+        <div class="monitor-status">
+          <div class="monitor-dot" id="monitor-dot"></div>
+          <span id="monitor-status-text" style="font-weight:700;color:var(--go);">ERPIE ACTIEF</span>
+          <span style="flex:1"></span>
+          <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <input type="checkbox" id="monitor-autorefresh" checked> Auto-refresh (10s)
+          </label>
+          <button class="btn btn-ghost" onclick="fetchMonitorData()" style="font-size:12px;padding:6px 12px;">🔄 Refresh</button>
+        </div>
+
+        <div class="monitor-stats">
+          <div class="monitor-stat">
+            <div class="monitor-stat-label">⏱ Uptime</div>
+            <div class="monitor-stat-value" id="mon-uptime">—</div>
+          </div>
+          <div class="monitor-stat">
+            <div class="monitor-stat-label">📊 Deals in History</div>
+            <div class="monitor-stat-value" id="mon-deals">—</div>
+          </div>
+          <div class="monitor-stat">
+            <div class="monitor-stat-label">🧠 Memory laatst bijgewerkt</div>
+            <div class="monitor-stat-value" id="mon-memory">—</div>
+          </div>
+          <div class="monitor-stat">
+            <div class="monitor-stat-label">🕐 Server tijd</div>
+            <div class="monitor-stat-value" id="mon-time">—</div>
+          </div>
+        </div>
+
+        <div class="monitor-log" id="monitor-log">Laden...</div>
+        <div class="monitor-footer">Monitoring http://89.167.28.106:3001 · ERPIE PriceFinder</div>
+      </div>
     </div>
   </div>
 
@@ -4974,6 +5029,59 @@ function filterZelfstudie(term) {
   document.getElementById('zelfstudie-search').value = term;
   renderZelfstudie(term);
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// MONITOR TAB
+// ══════════════════════════════════════════════════════════════════════
+let _monitorInterval = null;
+
+async function fetchMonitorData() {
+  try {
+    const res = await fetch(API_BASE + '/api/monitor');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    // Status
+    document.getElementById('monitor-dot').classList.remove('offline');
+    document.getElementById('monitor-status-text').textContent = 'ERPIE ACTIEF';
+    document.getElementById('monitor-status-text').style.color = 'var(--go)';
+    // Stats
+    document.getElementById('mon-uptime').textContent = data.uptime || '—';
+    document.getElementById('mon-deals').textContent = data.dealCount ?? '—';
+    document.getElementById('mon-memory').textContent = data.memoryLastModified || '—';
+    document.getElementById('mon-time').textContent = data.serverTime ? new Date(data.serverTime).toLocaleTimeString('nl-NL') : '—';
+    // Logs
+    const logEl = document.getElementById('monitor-log');
+    logEl.textContent = (data.logs || []).join('\n') || 'Geen logs beschikbaar';
+    logEl.scrollTop = logEl.scrollHeight;
+  } catch (e) {
+    document.getElementById('monitor-dot').classList.add('offline');
+    document.getElementById('monitor-status-text').textContent = 'OFFLINE';
+    document.getElementById('monitor-status-text').style.color = '#d50000';
+    document.getElementById('monitor-log').textContent = 'Kan geen verbinding maken met server: ' + e.message;
+  }
+}
+
+function startMonitorPolling() {
+  if (_monitorInterval) clearInterval(_monitorInterval);
+  if (document.getElementById('monitor-autorefresh').checked) {
+    _monitorInterval = setInterval(fetchMonitorData, 10000);
+  }
+}
+
+document.getElementById('monitor-autorefresh').addEventListener('change', startMonitorPolling);
+
+// Start polling when monitor tab is opened
+const origTabClick = document.querySelectorAll('.tab');
+origTabClick.forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (tab.dataset.tab === 'monitor') {
+      fetchMonitorData();
+      startMonitorPolling();
+    } else {
+      if (_monitorInterval) { clearInterval(_monitorInterval); _monitorInterval = null; }
+    }
+  });
+});
 
 // Apply language on load
 document.addEventListener('DOMContentLoaded', function() {
