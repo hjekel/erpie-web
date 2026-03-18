@@ -5037,7 +5037,7 @@ let _monitorInterval = null;
 
 async function fetchMonitorData() {
   try {
-    const res = await fetch(API_BASE + '/api/monitor');
+    const res = await fetch('/erpie/api/monitor');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     // Status
