@@ -917,12 +917,32 @@ router.get('/api/monitor', async (req, res) => {
       memoryLastModified = stat.mtime.toISOString().slice(0, 16).replace('T', ' ');
     } catch (e) { memoryLastModified = 'niet beschikbaar'; }
 
+    // Cost tracking — estimate from PM2 logs
+    let tokensToday = 0;
+    let braveQueries = 0;
+    try {
+      const allLogs = execSync('pm2 logs erpie-web --lines 500 --nostream 2>&1', { timeout: 8000 })
+        .toString().replace(/\x1b\[[0-9;]*m/g, '').toLowerCase();
+      // Count Gemini API calls (each ai-quote call ≈ 2000 tokens)
+      tokensToday = (allLogs.match(/\[ai-quote\] executing/g) || []).length * 2000;
+      // Count brave/search mentions
+      braveQueries = (allLogs.match(/brave|websearch|web_search/g) || []).length;
+    } catch (e) { /* ignore */ }
+    const costToday = tokensToday * 0.000001;      // Gemini Flash: $1/1M tokens
+    const braveCost = braveQueries * 0.005;          // Brave: $5/1000 queries
+    const totalCostToday = costToday + braveCost;
+
     res.json({
       ok: true,
       serverTime: new Date().toISOString(),
       uptime,
       dealCount,
       memoryLastModified,
+      tokensToday,
+      costToday: Math.round(costToday * 10000) / 10000,
+      braveQueries,
+      braveCost: Math.round(braveCost * 10000) / 10000,
+      totalCostToday: Math.round(totalCostToday * 10000) / 10000,
       logs
     });
   } catch (e) {

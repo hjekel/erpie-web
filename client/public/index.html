@@ -1839,6 +1839,11 @@ Voorbeelden:
             <div class="monitor-stat-label">🕐 Server tijd</div>
             <div class="monitor-stat-value" id="mon-time">—</div>
           </div>
+          <div class="monitor-stat">
+            <div class="monitor-stat-label">💰 Kosten vandaag</div>
+            <div class="monitor-stat-value" id="mon-cost">—</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;" id="mon-cost-detail"></div>
+          </div>
         </div>
 
         <div class="monitor-log" id="monitor-log">Laden...</div>
@@ -5049,6 +5054,9 @@ async function fetchMonitorData() {
     document.getElementById('mon-deals').textContent = data.dealCount ?? '—';
     document.getElementById('mon-memory').textContent = data.memoryLastModified || '—';
     document.getElementById('mon-time').textContent = data.serverTime ? new Date(data.serverTime).toLocaleTimeString('nl-NL') : '—';
+    // Cost
+    document.getElementById('mon-cost').textContent = '€' + (data.totalCostToday ?? 0).toFixed(4);
+    document.getElementById('mon-cost-detail').textContent = (data.tokensToday ?? 0).toLocaleString() + ' tokens · ' + (data.braveQueries ?? 0) + ' searches';
     // Logs
     const logEl = document.getElementById('monitor-log');
     logEl.textContent = (data.logs || []).join('\n') || 'Geen logs beschikbaar';
