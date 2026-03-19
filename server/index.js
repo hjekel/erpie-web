@@ -167,10 +167,10 @@ function detectFormat(wb) {
     if (!nonEmpty.length) continue;
     for (let i = 0; i < Math.min(3, nonEmpty.length); i++) {
       const cells = nonEmpty[i].map(v => cellStr(v).toLowerCase().replace(/[\s_\-]/g,''));
-      const hasType  = cells.some(c => c.includes('producttype') || c === 'type' || c === 'producttyp');
-      const hasBrand = cells.some(c => c === 'brand' || c === 'manufacturer');
+      const hasType  = cells.some(c => c.includes('producttype') || c === 'type' || c === 'producttyp' || c.includes('modelcategory'));
+      const hasBrand = cells.some(c => c === 'brand' || c === 'manufacturer' || c === 'make');
       const hasModel = cells.some(c => c === 'model');
-      const hasSerial= cells.some(c => c.includes('serial'));
+      const hasSerial= cells.some(c => c.includes('serial') || c === 'sn');
       const hasCpu   = cells.some(c => c.includes('cpu') || c.includes('processor') || c.includes('cputype'));
       // Has type+brand+model+serial but NOT cpu → inventory format
       if (hasType && hasBrand && hasModel && hasSerial && !hasCpu) {
@@ -675,6 +675,22 @@ function inferGenFromModel(brand, model) {
     const g = parseInt(RegExp.$1);
     return { 3:'Gen5', 4:'Gen6', 5:'Gen7', 6:'Gen8', 7:'Gen10', 8:'Gen11', 9:'Gen12', 10:'Gen13' }[g] || null;
   }
+  // HP ProBook/EliteBook with Gx suffix
+  if (/(?:PROBOOK|ELITEBOOK)\s*\d{3}\s*G(\d+)/i.test(m)) {
+    const g = parseInt(RegExp.$1);
+    return { 3:'Gen5', 4:'Gen6', 5:'Gen7', 6:'Gen8', 7:'Gen10', 8:'Gen11', 9:'Gen12', 10:'Gen13' }[g] || null;
+  }
+  // Lenovo ThinkPad with "Gen Xi" suffix
+  if (/THINKPAD.*Gen\s*(\d+)/i.test(m)) {
+    const g = parseInt(RegExp.$1);
+    return { 1:'Gen10', 2:'Gen11', 3:'Gen12', 4:'Gen13', 5:'Gen14' }[g] || null;
+  }
+  // Apple MacBookPro model identifiers
+  if (/MACBOOKPRO16[,.]1|macbook.*16.*pro/i.test(m)) return 'Gen9';
+  if (/MACBOOKPRO15[,.]1|macbook.*15.*pro.*2018/i.test(m)) return 'Gen8';
+  if (/MACBOOKPRO14[,.]1/i.test(m)) return 'Gen7';
+  // Dell Latitude Chromebook
+  if (/CHROMEBOOK/i.test(m)) return 'Gen8';
   return null;
 }
 
@@ -690,14 +706,15 @@ function parseZonesInventory(wb) {
     let headerIdx = -1, colMap = {};
     for (let i = 0; i < Math.min(5, rows.length); i++) {
       const cells = rows[i].map(v => cellStr(v).toLowerCase().replace(/[\s_\-]/g, ''));
-      const typeCol  = cells.findIndex(c => c.includes('producttype') || c === 'type');
-      const brandCol = cells.findIndex(c => c === 'brand' || c === 'manufacturer');
+      const typeCol  = cells.findIndex(c => c.includes('producttype') || c === 'type' || c === 'producttyp');
+      const catCol   = cells.findIndex(c => c.includes('modelcategory'));
+      const brandCol = cells.findIndex(c => c === 'brand' || c === 'manufacturer' || c === 'make');
       const modelCol = cells.findIndex(c => c === 'model');
-      const serialCol= cells.findIndex(c => c.includes('serial'));
+      const serialCol= cells.findIndex(c => c.includes('serial') || c === 'sn');
       const gradeCol = cells.findIndex(c => c.includes('grade'));
-      if (typeCol >= 0 && brandCol >= 0 && modelCol >= 0) {
+      if (brandCol >= 0 && modelCol >= 0) {
         headerIdx = i;
-        colMap = { type: typeCol, brand: brandCol, model: modelCol, serial: serialCol, grade: gradeCol };
+        colMap = { type: typeCol, category: catCol, brand: brandCol, model: modelCol, serial: serialCol, grade: gradeCol };
         break;
       }
     }
@@ -711,12 +728,16 @@ function parseZonesInventory(wb) {
 
     for (let i = headerIdx + 1; i < rows.length; i++) {
       const row = rows[i];
-      const type  = cellStr(row[colMap.type]).toUpperCase();
+      const type  = colMap.type >= 0 ? cellStr(row[colMap.type]).toUpperCase() : '';
+      const category = colMap.category >= 0 ? cellStr(row[colMap.category]).toUpperCase() : '';
       const brand = cellStr(row[colMap.brand]).toUpperCase();
       const model = cellStr(row[colMap.model]).trim();
 
-      // Only process NOTEBOOKs and LAPTOPs
-      if (type !== 'NOTEBOOK' && type !== 'LAPTOP' && type !== 'DESKTOP') {
+      // Filter: accept NOTEBOOK/LAPTOP/DESKTOP or "Computer" category or "*EOL" type (excl Monitor/Phone)
+      const isNotebook = type === 'NOTEBOOK' || type === 'LAPTOP' || type === 'DESKTOP';
+      const isComputer = category === 'COMPUTER' || category.includes('COMPUTER');
+      const isEolComputer = type.includes('EOL') && !type.includes('MONITOR') && !type.includes('PHONE');
+      if (!isNotebook && !isComputer && !isEolComputer) {
         skippedNonNotebook++;
         continue;
       }

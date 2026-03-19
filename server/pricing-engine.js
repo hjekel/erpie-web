@@ -495,7 +495,7 @@ function calculatePrice(input) {
   return {
     model: rawModel, gen, status,
     advisedPrice: advised, priceLow: low, priceHigh: high,
-    ramGb, ssdGb, grade, region,
+    ramGb, ssdGb, grade, region, qty,
     cpu: rawCpu || null,
     knownCpus: GEN_CPU_HINTS[gen] || [],
     reasoning,
@@ -532,11 +532,13 @@ function analyzeDevices(devices, region = 'EU') {
     }
   }
 
-  const total  = results.length;
+  // Use qty for totals (grouped parsers like ZONES_INVENTORY set qty > 1)
+  const total  = results.reduce((s, r) => s + (r.qty || 1), 0);
+  const totalGroups = results.length;
   const goList = results.filter(r => r.status === 'GO');
   const watchList = results.filter(r => r.status === 'WATCH');
   const nogoList  = results.filter(r => r.status === 'NO-GO');
-  const totalValue = results.reduce((s, r) => s + (r.advisedPrice || 0), 0);
+  const totalValue = results.reduce((s, r) => s + (r.advisedPrice || 0) * (r.qty || 1), 0);
   const avgValue   = total ? Math.round(totalValue / total) : 0;
 
   // Bid range based on 80% of total advised (typical batch discount)
@@ -546,7 +548,10 @@ function analyzeDevices(devices, region = 'EU') {
   return {
     results,
     summary: {
-      total, goCount: goList.length, watchCount: watchList.length, nogoCount: nogoList.length,
+      total, totalGroups,
+      goCount: goList.reduce((s, r) => s + (r.qty || 1), 0),
+      watchCount: watchList.reduce((s, r) => s + (r.qty || 1), 0),
+      nogoCount: nogoList.reduce((s, r) => s + (r.qty || 1), 0),
       totalValue, avgValue, bidLow, bidHigh,
       recommendation: totalValue > 0
         ? (goList.length / total >= 0.6
