@@ -167,13 +167,13 @@ function detectFormat(wb) {
     if (!nonEmpty.length) continue;
     for (let i = 0; i < Math.min(3, nonEmpty.length); i++) {
       const cells = nonEmpty[i].map(v => cellStr(v).toLowerCase().replace(/[\s_\-]/g,''));
-      const hasType  = cells.some(c => c.includes('producttype') || c === 'type' || c === 'producttyp' || c.includes('modelcategory'));
-      const hasBrand = cells.some(c => c === 'brand' || c === 'manufacturer' || c === 'make');
+      const hasProductType = cells.some(c => c === 'producttype' || c === 'producttyp' || c === 'pat');
+      const hasBrand = cells.some(c => c === 'brand');
       const hasModel = cells.some(c => c === 'model');
-      const hasSerial= cells.some(c => c.includes('serial') || c === 'sn');
+      const hasSerial= cells.some(c => c.includes('serial'));
       const hasCpu   = cells.some(c => c.includes('cpu') || c.includes('processor') || c.includes('cputype'));
-      // Has type+brand+model+serial but NOT cpu → inventory format
-      if (hasType && hasBrand && hasModel && hasSerial && !hasCpu) {
+      // Strict: needs "Producttype" (not just "Type") + Brand + Model + Serial, NO cpu
+      if (hasProductType && hasBrand && hasModel && hasSerial && !hasCpu) {
         return 'ZONES_INVENTORY';
       }
     }

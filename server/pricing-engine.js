@@ -42,8 +42,8 @@ const MODEL_DB = {
   'latitude 5410': 'Gen10', 'latitude 5420': 'Gen11', 'latitude 5430': 'Gen12', 'latitude 5440': 'Gen13',
   'latitude 5480': 'Gen7',  'latitude 5490': 'Gen8',  'latitude 5500': 'Gen8',  'latitude 5510': 'Gen10',
   'latitude 5520': 'Gen11', 'latitude 5530': 'Gen12',
-  'latitude 7280': 'Gen7',  'latitude 7290': 'Gen8',  'latitude 7300': 'Gen8',  'latitude 7310': 'Gen10',
-  'latitude 7320': 'Gen11', 'latitude 7330': 'Gen12', 'latitude 7400': 'Gen8',  'latitude 7410': 'Gen10',
+  'latitude 7280': 'Gen7',  'latitude 7290': 'Gen8',  'latitude 7300': 'Gen10', 'latitude 7310': 'Gen10',
+  'latitude 7320': 'Gen11', 'latitude 7330': 'Gen12', 'latitude 7400': 'Gen10', 'latitude 7410': 'Gen10',
   'latitude 7420': 'Gen11', 'latitude 7430': 'Gen12', 'latitude 7480': 'Gen7',  'latitude 7490': 'Gen8',
 
   // Dell XPS
@@ -82,16 +82,16 @@ const MODEL_DB = {
   'probook 430 g5': 'Gen8',  'probook 430 g6': 'Gen8',  'probook 430 g7': 'Gen10',
   'probook 440 g5': 'Gen8',  'probook 440 g6': 'Gen8',  'probook 440 g7': 'Gen10',
   'probook 450 g5': 'Gen8',  'probook 450 g6': 'Gen8',  'probook 450 g7': 'Gen10',
-  'probook 640 g4': 'Gen8',  'probook 640 g5': 'Gen8',
-  'probook 650 g4': 'Gen8',  'probook 650 g5': 'Gen8',
+  'probook 640 g4': 'Gen8',  'probook 640 g5': 'Gen8',  'probook 640 g8': 'Gen11', 'probook 640 g9': 'Gen12',
+  'probook 650 g4': 'Gen8',  'probook 650 g5': 'Gen8',  'probook 650 g8': 'Gen11',
 
   // HP 250
   'hp 250 g6': 'Gen6', '250 g6': 'Gen6',
   'hp 250 g7': 'Gen8', '250 g7': 'Gen8',
 
   // Lenovo ThinkPad T
-  't14 gen 1': 'Gen10', 't14 gen 2': 'Gen11', 't14 gen 3': 'Gen12',
-  't14s gen 1': 'Gen10', 't14s gen 2': 'Gen11', 't14s gen 3': 'Gen12',
+  't14 gen 1': 'Gen10', 't14 gen 2': 'Gen11', 't14 gen 2i': 'Gen11', 't14 gen 3': 'Gen12',
+  't14s gen 1': 'Gen10', 't14s gen 2': 'Gen11', 't14s gen 2i': 'Gen11', 't14s gen 3': 'Gen12',
   't460': 'Gen6', 't460s': 'Gen6',
   't470': 'Gen7', 't470s': 'Gen7',
   't480': 'Gen8', 't480s': 'Gen8',
@@ -109,9 +109,19 @@ const MODEL_DB = {
   'portege z30-a': 'Gen4', 'portege z30-b': 'Gen5', 'portege z30-c': 'Gen6',
 
   // Apple Intel
-  'macbook pro 16 2019': 'Gen9',
-  'macbook pro 15 2019': 'Gen9',
-  'macbook pro 13 2020': 'Gen10',
+  'macbook pro 16 2019': 'Gen9',  'macbookpro16,1': 'Gen9', 'macbookpro16 1': 'Gen9',
+  'macbook pro 15 2019': 'Gen9',  'macbookpro15,1': 'Gen9',
+  'macbook pro 13 2020': 'Gen10', 'macbookpro13,1': 'Gen6', 'macbookpro14,1': 'Gen7',
+  'macbook 16" pro': 'Gen9', 'macbook 16 pro': 'Gen9',
+
+  // HP EliteBook 745
+  'elitebook 745 g6': 'Gen8',
+  // HP EliteBook 845
+  'elitebook 845 g7': 'Gen10', 'elitebook 845 g8': 'Gen11',
+
+  // Dell Latitude extra
+  'latitude 9420': 'Gen11', 'latitude 9440': 'Gen13',
+  'latitude 5400': 'Gen10', 'latitude 5450': 'Gen14', 'latitude 7450': 'Gen14',
 };
 
 // ─── APPLE SILICON DIRECT PRICES ─────────────────────────────────────────────
@@ -157,7 +167,13 @@ function normaliseModel(raw) {
   s = s.replace(/hewlett[-\s]?packard|hp inc\./gi, 'hp');
   s = s.replace(/dell inc\./gi, 'dell');
   s = s.replace(/^lenovo\s+/i, '');
-  s = s.replace(/\s+notebook\s+pc$/i, '');
+  // Strip noise suffixes
+  s = s.replace(/\s+notebook\s*pc$/i, '');
+  s = s.replace(/\s+notebook$/i, '');
+  s = s.replace(/\s+mobile\s+workstation$/i, '');
+  // "Latitude 5000 Series 5410" → "Latitude 5410"
+  s = s.replace(/(\d)000\s+series\s+/i, '');
+  // "Latitude Chromebook 5400" → keep as-is (chromebook detection needs it)
   s = s.replace(/\s+/g, ' ').trim();
   return s;
 }
