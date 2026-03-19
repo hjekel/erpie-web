@@ -159,13 +159,33 @@ function detectFormat(wb) {
     return 'ARS';
   }
 
-  // 3. Check remaining formats
+  // 3. ZONES_INVENTORY — has Product Type + Brand + Model + Serial but NO CPU/RAM/SSD
+  for (const name of wb.SheetNames) {
+    const lower = name.toLowerCase();
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: '' });
+    const nonEmpty = rows.filter(r => r.some(v => cellStr(v).length > 0));
+    if (!nonEmpty.length) continue;
+    for (let i = 0; i < Math.min(3, nonEmpty.length); i++) {
+      const cells = nonEmpty[i].map(v => cellStr(v).toLowerCase().replace(/[\s_\-]/g,''));
+      const hasType  = cells.some(c => c.includes('producttype') || c === 'type' || c === 'producttyp');
+      const hasBrand = cells.some(c => c === 'brand' || c === 'manufacturer');
+      const hasModel = cells.some(c => c === 'model');
+      const hasSerial= cells.some(c => c.includes('serial'));
+      const hasCpu   = cells.some(c => c.includes('cpu') || c.includes('processor') || c.includes('cputype'));
+      // Has type+brand+model+serial but NOT cpu → inventory format
+      if (hasType && hasBrand && hasModel && hasSerial && !hasCpu) {
+        return 'ZONES_INVENTORY';
+      }
+    }
+  }
+
+  // 4. Check remaining formats
   for (const name of wb.SheetNames) {
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: '' });
     const nonEmpty = rows.filter(r => r.some(v => cellStr(v).length > 0));
     if (!nonEmpty.length) continue;
 
-    // 4. Generic with headers (Frankfurt style, any CSV with model column)
+    // 5. Generic with headers (Frankfurt style, any CSV with model column)
     for (let i = 0; i < Math.min(10, nonEmpty.length); i++) {
       const cells = nonEmpty[i].map(v => cellStr(v).toLowerCase().replace(/[\s_\-]/g,''));
       const score = ['model','device','modelname','computername','description'].filter(k => cells.includes(k)).length
@@ -604,16 +624,156 @@ function parseTextInput(text) {
 }
 
 // ─── MAIN ENTRY POINT ─────────────────────────────────────────────────────────
+// ─── ZONES INVENTORY PARSER ──────────────────────────────────────────────────
+const MODEL_GEN_MAP = {
+  // Dell Latitude: last 2 digits of model number → Gen
+  '10': 'Gen10', '11': 'Gen10',
+  '20': 'Gen11', '21': 'Gen11',
+  '30': 'Gen12', '31': 'Gen12',
+  '40': 'Gen13', '41': 'Gen13',
+  '50': 'Gen14', '51': 'Gen14',
+};
+
+function inferGenFromModel(brand, model) {
+  const m = model.toUpperCase();
+
+  // Dell specific models first (override generic pattern)
+  if (/7400.*2-IN-1/i.test(m)) return 'Gen8';
+  if (/E5470/i.test(m)) return 'Gen6';
+  if (/7480/i.test(m)) return 'Gen7';
+  if (/3380/i.test(m)) return 'Gen7';
+  if (/5490/i.test(m)) return 'Gen8';
+  if (/7490/i.test(m)) return 'Gen8';
+  if (/3590/i.test(m)) return 'Gen8';
+
+  // Dell Latitude/Precision: 4-digit model → last 2 digits = generation suffix
+  const latMatch = m.match(/(?:LATITUDE|PRECISION)\s*(\d)(\d)(\d{2})\b/i);
+  if (latMatch) {
+    const suffix = latMatch[3];
+    if (MODEL_GEN_MAP[suffix]) return MODEL_GEN_MAP[suffix];
+    // Special suffixes: x400 = Gen10, x300 = Gen10, x90 = Gen8
+    if (suffix === '00') return 'Gen10';  // 5400, 7400, 7300 etc
+    if (suffix === '90') return 'Gen8';   // 5490, 7490, 3590
+    if (suffix === '80') return 'Gen7';   // 7480
+  }
+
+  // Dell OptiPlex desktops
+  if (/OPTIPLEX\s*70(\d)0/i.test(m)) {
+    const d = parseInt(RegExp.$1);
+    return { 5:'Gen7', 6:'Gen8', 7:'Gen9', 8:'Gen10', 9:'Gen11' }[d] || null;
+  }
+
+  // HP models
+  if (/250\s*G(\d+)/i.test(m)) {
+    const g = parseInt(RegExp.$1);
+    return { 2:'Gen4', 3:'Gen5', 4:'Gen6', 5:'Gen7', 6:'Gen7', 7:'Gen8', 8:'Gen11', 9:'Gen12', 10:'Gen13' }[g] || null;
+  }
+  if (/PRO\s*3120/i.test(m)) return 'Gen4';
+  if (/PROBOOK\s*6570/i.test(m)) return 'Gen3';
+  if (/PAVILION/i.test(m)) return null; // too generic
+  if (/ELITEBOOK\s*8[345]\d\s*G(\d+)/i.test(m)) {
+    const g = parseInt(RegExp.$1);
+    return { 3:'Gen5', 4:'Gen6', 5:'Gen7', 6:'Gen8', 7:'Gen10', 8:'Gen11', 9:'Gen12', 10:'Gen13' }[g] || null;
+  }
+  return null;
+}
+
+function parseZonesInventory(wb) {
+  const devices = [];
+  const warnings = [];
+
+  for (const name of wb.SheetNames) {
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: '' });
+    if (rows.length < 2) continue;
+
+    // Find header row
+    let headerIdx = -1, colMap = {};
+    for (let i = 0; i < Math.min(5, rows.length); i++) {
+      const cells = rows[i].map(v => cellStr(v).toLowerCase().replace(/[\s_\-]/g, ''));
+      const typeCol  = cells.findIndex(c => c.includes('producttype') || c === 'type');
+      const brandCol = cells.findIndex(c => c === 'brand' || c === 'manufacturer');
+      const modelCol = cells.findIndex(c => c === 'model');
+      const serialCol= cells.findIndex(c => c.includes('serial'));
+      const gradeCol = cells.findIndex(c => c.includes('grade'));
+      if (typeCol >= 0 && brandCol >= 0 && modelCol >= 0) {
+        headerIdx = i;
+        colMap = { type: typeCol, brand: brandCol, model: modelCol, serial: serialCol, grade: gradeCol };
+        break;
+      }
+    }
+    if (headerIdx < 0) continue;
+
+    console.log(`[zones-inventory] Sheet "${name}": header at row ${headerIdx}, colMap:`, colMap);
+
+    // Aggregate by brand+model
+    const groups = {};
+    let skippedNonNotebook = 0;
+
+    for (let i = headerIdx + 1; i < rows.length; i++) {
+      const row = rows[i];
+      const type  = cellStr(row[colMap.type]).toUpperCase();
+      const brand = cellStr(row[colMap.brand]).toUpperCase();
+      const model = cellStr(row[colMap.model]).trim();
+
+      // Only process NOTEBOOKs and LAPTOPs
+      if (type !== 'NOTEBOOK' && type !== 'LAPTOP' && type !== 'DESKTOP') {
+        skippedNonNotebook++;
+        continue;
+      }
+      if (!model) continue;
+
+      const key = `${brand}|${model}`;
+      if (!groups[key]) {
+        const grade = colMap.grade >= 0 ? cellStr(row[colMap.grade]) : '';
+        groups[key] = { brand, model, grade: grade || '', qty: 0, serials: [] };
+      }
+      groups[key].qty++;
+      if (colMap.serial >= 0) {
+        const s = cellStr(row[colMap.serial]);
+        if (s && s !== 'N/A') groups[key].serials.push(s);
+      }
+    }
+
+    console.log(`[zones-inventory] Skipped ${skippedNonNotebook} non-notebook rows, found ${Object.keys(groups).length} model groups`);
+
+    for (const [key, g] of Object.entries(groups)) {
+      const gen = inferGenFromModel(g.brand, g.model);
+      const assumed = [];
+      if (!gen) assumed.push('CPU gen could not be inferred from model');
+      if (!g.grade) assumed.push('Grade assumed B');
+      assumed.push('RAM assumed 8GB', 'SSD assumed 256GB');
+
+      devices.push({
+        brand: g.brand,
+        model: `${g.brand} ${g.model}`,
+        cpu: gen ? `Inferred ${gen} from model` : 'Unknown',
+        gen: gen || 'Unknown',
+        ram: 8,
+        ssd: 256,
+        grade: g.grade || 'B',
+        qty: g.qty,
+        quantity: g.qty,
+        warnings: assumed
+      });
+    }
+  }
+
+  if (!devices.length) warnings.push('No NOTEBOOK/LAPTOP devices found');
+  console.log(`[zones-inventory] Total: ${devices.length} device groups`);
+  return devices;
+}
+
 function parseExcel(buffer) {
   const wb = XLSX.read(buffer, { type: 'buffer' });
   const format = detectFormat(wb);
 
   switch (format) {
-    case 'ARS':             return parseARS(wb);
-    case 'ARS_SIMPLE':     return parseARSSimple(wb);
-    case 'VENDOR_QUOTE':   return parseVendorQuote(wb);
-    case 'GENERIC_HEADERS':return parseGenericHeaders(wb);
-    default:               return parseGenericHeaderless(wb);
+    case 'ARS':              return parseARS(wb);
+    case 'ARS_SIMPLE':       return parseARSSimple(wb);
+    case 'VENDOR_QUOTE':     return parseVendorQuote(wb);
+    case 'ZONES_INVENTORY':  return parseZonesInventory(wb);
+    case 'GENERIC_HEADERS':  return parseGenericHeaders(wb);
+    default:                 return parseGenericHeaderless(wb);
   }
 }
 

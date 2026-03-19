@@ -346,10 +346,15 @@ function calculatePrice(input) {
     gen = genFromCpu(rawCpu);
     if (gen) reasoning.push(`Gen from CPU string: ${rawCpu} → ${gen}`);
   }
+  // Accept pre-inferred gen from parser (e.g., ZONES_INVENTORY)
+  if (!gen && input.gen && input.gen !== 'Unknown') {
+    gen = input.gen;
+    reasoning.push(`Gen inferred from model number: ${gen}`);
+  }
   if (!gen) {
     reasoning.push(`Unknown model: "${rawModel}" — defaulting to Gen8`);
     gen = 'Gen8';
-  } else {
+  } else if (!reasoning.some(r => r.includes('Gen'))) {
     reasoning.push(`Model matched: "${normModel}" → ${gen}`);
   }
 
