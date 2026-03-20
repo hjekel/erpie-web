@@ -608,55 +608,106 @@ function parseGenericHeaderless(wb) {
 
 // ─── TEXT INPUT PARSER ────────────────────────────────────────────────────────
 function parseTextInput(text) {
-  // Line-by-line email header filter — safe, doesn't eat device lines
-  const EMAIL_JUNK = /^(summarize this email|inbox|re:|fwd:|from:|to me|to:|subject:|sent:|cc:|planbit|caas\s*[-–]?\s*$|feb |mar |jan |apr |may |jun |jul |aug |sep |oct |nov |dec |http)/i;
-  const HAS_DEVICE = /\b(dell|hp|hewlett|lenovo|apple|macbook|thinkpad|latitude|elitebook|surface|asus|acer|fujitsu|toshiba|samsung|microsoft|iphone|ipad|galaxy|yoga|optiplex|probook|zbook|spectre|envy|pavilion)\b/i;
+  const EMAIL_JUNK = /^(summarize this email|inbox|re:|fwd:|from:|to me|to:|subject:|sent:|cc:|planbit|caas\s*[-–]?\s*$|feb |mar |jan |apr |may |jun |jul |aug |sep |oct |nov |dec |http|analyseer|target|geef|caps|qwertzu|lot-factor|totaal:)/i;
+  const HAS_DEVICE = /\b(dell|hp|hewlett|lenovo|apple|macbook|thinkpad|latitude|elitebook|surface|asus|acer|fujitsu|toshiba|samsung|microsoft|iphone|ipad|galaxy|yoga|optiplex|probook|zbook|spectre|envy|pavilion|chromebook)\b/i;
+  const SECTION_HEADER = /^(APPLE|DELL|HP|LENOVO|TOSHIBA|ACER|ASUS|MICROSOFT)\s*[—–-]\s*\d+\s*stuks?/i;
 
   const lines = text
     .split(/[\n;]+/)
     .map(l => l.trim())
     .filter(l => l.length > 4)
-    .filter(l => !EMAIL_JUNK.test(l) || HAS_DEVICE.test(l));
+    .filter(l => !EMAIL_JUNK.test(l) || HAS_DEVICE.test(l))
+    .filter(l => !SECTION_HEADER.test(l)); // Skip "APPLE — 43 stuks" headers
 
   const devices = [];
 
   for (const line of lines) {
     if (!HAS_DEVICE.test(line)) continue;
 
-    // Qty: "60x", "- 60x", "• 3×", "CAAS - 60x"
-    const qtyMatch = line.match(/(?:^|CAAS\s*[-–]\s*)[\-\*\•\·]?\s*(\d+)\s*[xX×]/i);
-    const qty = qtyMatch ? Math.min(parseInt(qtyMatch[1]), 999) : 1;
-    const rest = qtyMatch ? line.slice(line.indexOf(qtyMatch[0]) + qtyMatch[0].length).trim() : line;
+    // Strip leading number "01. " or "08. "
+    let cleaned = line.replace(/^\d{1,3}[\.\)]\s*/, '');
 
-    // Model: everything before first / or , or spec keyword
-    const modelStop = /[\/,]|\b(i[3579][-\s]|\d+\s*GB|\d+\s*TB|Gen\s*\d|M[123]\b|FHD|UHD|4K|\d+"|\d+inch)/i;
-    const modelRaw = rest.split(modelStop)[0].trim().replace(/^[-\*\•\·\s]+/, '');
+    // Qty at END of line: "· 42x" or "· 2 stuks" or "42x" at end
+    let qty = 1;
+    const qtyEndMatch = cleaned.match(/[·\-]\s*(\d+)\s*[xX×]\s*$/);
+    const qtyStuksMatch = cleaned.match(/[·\-]\s*(\d+)\s*stuks?\s*$/i);
+    const qtyStartMatch = cleaned.match(/^(\d+)\s*[xX×]\s+/);
+    if (qtyEndMatch) {
+      qty = Math.min(parseInt(qtyEndMatch[1]), 9999);
+      cleaned = cleaned.slice(0, cleaned.indexOf(qtyEndMatch[0])).trim();
+    } else if (qtyStuksMatch) {
+      qty = Math.min(parseInt(qtyStuksMatch[1]), 9999);
+      cleaned = cleaned.slice(0, cleaned.indexOf(qtyStuksMatch[0])).trim();
+    } else if (qtyStartMatch) {
+      qty = Math.min(parseInt(qtyStartMatch[1]), 9999);
+      cleaned = cleaned.slice(qtyStartMatch[0].length).trim();
+    }
 
+    // Split on · (dot separator) for structured format: "Model · CPU · RAM/SSD · Qty"
+    const parts = cleaned.split(/\s*·\s*/);
+
+    let modelRaw, specsPart;
+    if (parts.length >= 2) {
+      // Structured: first part = model, rest = specs
+      modelRaw = parts[0].trim();
+      specsPart = parts.slice(1).join(' ');
+    } else {
+      // Unstructured: split on spec keywords
+      const modelStop = /\b(i[3579][-\s]\d|Ryzen|M[123]\s|FHD|UHD|Gen\s*\d)/i;
+      const stopMatch = cleaned.match(modelStop);
+      if (stopMatch) {
+        modelRaw = cleaned.slice(0, stopMatch.index).trim();
+        specsPart = cleaned.slice(stopMatch.index);
+      } else {
+        modelRaw = cleaned;
+        specsPart = '';
+      }
+    }
+
+    // Clean model name
+    modelRaw = modelRaw.replace(/^[-\*\•\·\s]+/, '').replace(/\s+/g, ' ').trim();
     if (!HAS_DEVICE.test(modelRaw) || modelRaw.length < 4) continue;
 
-    const cpu   = extractCPU(rest);
-    const ram   = extractRAM(rest);
-    const ssd   = extractSSD(rest);
-    const grade = extractGrade(rest);
+    // Parse RAM/SSD from "16/512" or "16GB/512GB" or "16/256" patterns
+    const ramSsdMatch = (specsPart || '').match(/(\d+)\s*(?:GB)?\s*\/\s*(\d+)\s*(?:GB)?/);
+    let ram = null, ssd = null;
+    if (ramSsdMatch) {
+      const v1 = parseInt(ramSsdMatch[1]);
+      const v2 = parseInt(ramSsdMatch[2]);
+      // Smaller = RAM, larger = SSD (or if both small, first=RAM second=SSD)
+      if (v1 <= 64 && v2 >= 64) { ram = v1; ssd = v2; }
+      else if (v1 <= 64 && v2 <= 64) { ram = v1; ssd = v2; }
+      else { ram = v1; ssd = v2; }
+    }
+    if (!ram) ram = extractRAM(specsPart || cleaned);
+    if (!ssd) ssd = extractSSD(specsPart || cleaned);
 
-    devices.push({ model: modelRaw, cpu, ram, ssd, grade });
+    const cpu = extractCPU(specsPart || cleaned);
+    const grade = extractGrade(specsPart || cleaned);
+
+    // Infer gen from model if no CPU found
+    const gen = inferGenFromModel('', modelRaw);
+
+    devices.push({ model: modelRaw, cpu, ram, ssd, grade, qty, quantity: qty, gen });
   }
 
-  // Deduplicate: if same model appears twice (e.g. "- 60x Dell" + "60x Dell..."),
-  // merge into the one with most specs
+  // Deduplicate by model name
   const merged = [];
   for (const d of devices) {
     const existing = merged.find(m => m.model.toLowerCase() === d.model.toLowerCase());
     if (existing) {
-      // Keep whichever has more specs filled
+      existing.qty = (existing.qty || 1) + (d.qty || 1);
+      existing.quantity = existing.qty;
       if (!existing.ram && d.ram) existing.ram = d.ram;
       if (!existing.ssd && d.ssd) existing.ssd = d.ssd;
       if (!existing.cpu && d.cpu) existing.cpu = d.cpu;
       if (!existing.grade && d.grade) existing.grade = d.grade;
+      if (!existing.gen && d.gen) existing.gen = d.gen;
     } else {
       merged.push(d);
     }
   }
+  console.log(`[parseTextInput] Parsed ${devices.length} lines → ${merged.length} unique models, total qty ${merged.reduce((s,d) => s + (d.qty||1), 0)}`);
   return merged;
 }
 
