@@ -20,12 +20,16 @@ const RAM_ADJ = { 4: -40, 8: 0, 16: 30, 32: 70, 64: 130 };
 const SSD_ADJ = { 128: -25, 256: 0, 512: 35, 1024: 70, 2048: 110 };
 
 // ─── GRADE MULTIPLIERS ───────────────────────────────────────────────────────
+// Calibrated on PlanBit actuals: B4 is the standard resale grade
+// C6/B4 ratio averages 0.37 across all models (Dell, HP, Lenovo, Apple)
 const GRADE_MULT = {
-  'A1': 1.40, 'A2': 1.25, 'A3': 1.15,
-  'A': 1.00,
-  'B': 0.90, 'B4': 0.85,
-  'C': 0.70, 'C6': 0.60,
-  'D': 0.40
+  'A1': 1.30, 'A2': 1.20, 'A3': 1.10,
+  'A': 1.05,
+  'B': 1.00, 'B4': 1.00,
+  'C': 0.40, 'C6': 0.37,
+  'D': 0.15,
+  'P7': 0,  // parts only → flat €5 (handled separately)
+  'X9': 0,  // defect → flat €1 (handled separately)
 };
 
 // ─── BRAND TIER MULTIPLIERS ──────────────────────────────────────────────────
@@ -314,11 +318,23 @@ function calculatePrice(input) {
   const normModel = normaliseModel(rawModel);
   const ramGb  = snapRam(parseRam(rawRam));
   const ssdGb  = snapSsd(parseSsd(rawSsd));
-  const grade  = (rawGrade || 'A').toUpperCase().trim();
+  const grade  = (rawGrade || 'B').toUpperCase().trim();
   const region = (rawRegion || 'EU').toUpperCase().trim();
   const qty    = Math.max(1, parseInt(rawQty, 10) || 1);
 
   const reasoning = [];
+
+  // ── Parts/Scrap grades → flat pricing ──────────────────────────────────────
+  if (grade === 'P7' || grade.startsWith('P')) {
+    reasoning.push(`Grade ${grade}: parts only → flat €5`);
+    return { model: rawModel, gen: 'Parts', status: 'NO-GO', advisedPrice: 5, priceLow: 1, priceHigh: 10,
+             ramGb, ssdGb, grade, region, qty, cpu: rawCpu || null, knownCpus: [], reasoning };
+  }
+  if (grade === 'X9' || grade.startsWith('X')) {
+    reasoning.push(`Grade ${grade}: defect → flat €1`);
+    return { model: rawModel, gen: 'Defect', status: 'NO-GO', advisedPrice: 1, priceLow: 0, priceHigh: 5,
+             ramGb, ssdGb, grade, region, qty, cpu: rawCpu || null, knownCpus: [], reasoning };
+  }
 
   // ── Apple Silicon ────────────────────────────────────────────────────────────
   for (const [key, price] of Object.entries(APPLE_SILICON)) {
