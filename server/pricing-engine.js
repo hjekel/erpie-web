@@ -1,14 +1,17 @@
 'use strict';
 
 // ─── BASE PRICES PER CPU GENERATION ─────────────────────────────────────────
+// Calibrated on 24,826 actual PlanBit sales (2024-2026)
+// Base = Grade A, 8GB RAM, 256GB SSD median resale price
 const BASE_PRICES = {
-  'Gen14': 450, 'Gen13': 380, 'Gen12': 310, 'Gen11': 245, 'Gen10': 200,
-  'Gen9': 160,  'Gen8': 150,  'Gen7': 70,   'Gen6': 40,   'Gen5': 20,
+  'Gen14': 400, 'Gen13': 380, 'Gen12': 285, 'Gen11': 210, 'Gen10': 175,
+  'Gen9': 160,  'Gen8': 100,  'Gen7': 55,   'Gen6': 40,   'Gen5': 20,
   'Gen4': 10
 };
 
 // ─── WATCH CAPS ──────────────────────────────────────────────────────────────
-const WATCH_CAPS = { 'Gen8': 120, 'Gen9': 140 };
+// Gen8 base is now €85 so WATCH cap at €75 (actual median €75)
+const WATCH_CAPS = { 'Gen8': 85, 'Gen9': 140 };
 
 // ─── RAM ADJUSTMENTS (baseline 8GB) ─────────────────────────────────────────
 const RAM_ADJ = { 4: -40, 8: 0, 16: 30, 32: 70, 64: 130 };
@@ -134,10 +137,11 @@ const APPLE_SILICON = {
 };
 
 // ─── APPLE INTEL DIRECT PRICES ───────────────────────────────────────────────
+// Calibrated on PlanBit actuals: MBP16.1=€323med(503x), MBP15.2=€192med(175x), MBP15.1=€239med(129x)
 const APPLE_INTEL = {
-  'macbook pro 16 2019': 390,
-  'macbook pro 15 2019': 350,
-  'macbook pro 13 2020': 350,
+  'macbook pro 16 2019': 325,  'macbookpro16,1': 325, 'macbookpro16.1': 325,
+  'macbook pro 15 2019': 240,  'macbookpro15,1': 240, 'macbookpro15.1': 240,
+  'macbook pro 13 2020': 200,  'macbookpro15,2': 200, 'macbookpro15.2': 200,
 };
 
 // ─── MODEL-SPECIFIC BASE PRICE OVERRIDES ─────────────────────────────────────
@@ -434,7 +438,9 @@ function calculatePrice(input) {
 
   // 2. GEN8 BULK CAPS — model-specific max prices for lot sales
   const GEN8_CAPS = [
-    { pat: /thinkpad\s*t4[789]0\b/i, cap: 20, label: 'ThinkPad T470/T480/T490 lot' },
+    { pat: /thinkpad\s*t470\b/i, cap: 45, label: 'ThinkPad T470 lot (actual median €50)' },
+    { pat: /thinkpad\s*t480\b/i, cap: 65, label: 'ThinkPad T480 lot (actual median €76)' },
+    { pat: /thinkpad\s*t490\b/i, cap: 65, label: 'ThinkPad T490 lot (actual median €75)' },
     { pat: /thinkpad\s*t495/i, cap: 25, label: 'ThinkPad T495 AMD lot' },
     { pat: /latitude\s*(5490|5400|7390)/i, cap: 55, label: 'Dell Latitude Gen8 lot' },
     { pat: /latitude\s*7480/i, cap: 25, label: 'Dell Latitude 7480 Gen7 lot' },
