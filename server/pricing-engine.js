@@ -13,11 +13,12 @@ const BASE_PRICES = {
 // Gen8 base is now €85 so WATCH cap at €75 (actual median €75)
 const WATCH_CAPS = { 'Gen8': 85, 'Gen9': 140 };
 
-// ─── RAM ADJUSTMENTS (baseline 8GB) ─────────────────────────────────────────
-const RAM_ADJ = { 4: -40, 8: 0, 16: 30, 32: 70, 64: 130 };
+// ─── RAM ADJUSTMENTS (baseline 8GB) — Joep 19/03/26: "aanvullingen, geen grote stijgingen"
+// Data confirms: 8→16GB = +€5 median difference (Gen11)
+const RAM_ADJ = { 4: -40, 8: 0, 16: 15, 32: 50, 64: 100 };
 
-// ─── SSD ADJUSTMENTS (baseline 256GB) ───────────────────────────────────────
-const SSD_ADJ = { 128: -25, 256: 0, 512: 35, 1024: 70, 2048: 110 };
+// ─── SSD ADJUSTMENTS (baseline 256GB) — Joep 19/03/26: "512GB slechts +€10-15, niet +€35"
+const SSD_ADJ = { 0: -50, 128: -25, 256: 0, 512: 15, 1024: 20, 2048: 80 };
 
 // ─── GRADE MULTIPLIERS ───────────────────────────────────────────────────────
 // Calibrated on PlanBit actuals: B4 is the standard resale grade
