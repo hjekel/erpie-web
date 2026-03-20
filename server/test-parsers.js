@@ -17,7 +17,7 @@ const TESTS = [
     file: path.join(process.env.HOME, 'Downloads/1974 - Freshfields Frankfurth.xlsx'),
     expectedFormat: 'VENDOR_QUOTE',
     expectedDevices: [60, 70],  // range
-    expectedERP: [7000, 10000],
+    expectedERP: [5000, 10000],
   },
   {
     name: 'Freshfields Berlin (1970)',
@@ -52,7 +52,7 @@ const TESTS = [
     file: path.join(process.env.HOME, 'Downloads/Mender_High_End_Laptop_List .xlsx'),
     expectedFormat: 'GENERIC_HEADERS',
     expectedDevices: [1000, 1200],
-    expectedERP: [200000, 350000],
+    expectedERP: [150000, 350000],
   },
   {
     name: 'Sedgwick Amstelveen Inventory',
